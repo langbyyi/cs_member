@@ -1,0 +1,450 @@
+/**
+ * 背景加载性能优化系统
+ * 提供渐进式加载、懒加载和性能监控
+ */
+
+/* 性能优化全局变量 */
+:root {
+  --performance-level: auto; /* auto, high, medium, low */
+  --animation-quality: high; /* high, medium, low, none */
+  --effect-complexity: full; /* full, reduced, minimal */
+  --loading-strategy: progressive; /* progressive, lazy, instant */
+}
+
+/* 性能检测和适配 */
+.performance-optimized {
+  /* 基础性能优化 */
+  contain: layout style paint;
+  transform: translateZ(0);
+  will-change: transform;
+
+  /* 渐进式增强基础样式 */
+  background: #f5f5f5;
+}
+
+/* 高性能模式 (默认) */
+.performance-high {
+  --performance-level: high;
+  --animation-quality: high;
+  --effect-complexity: full;
+}
+
+/* 中等性能模式 */
+.performance-medium {
+  --performance-level: medium;
+  --animation-quality: medium;
+  --effect-complexity: reduced;
+}
+
+/* 低性能模式 */
+.performance-low {
+  --performance-level: low;
+  --animation-quality: low;
+  --effect-complexity: minimal;
+}
+
+/* 超低性能模式 */
+.performance-minimal {
+  --performance-level: minimal;
+  --animation-quality: none;
+  --effect-complexity: none;
+}
+
+/* 渐进式背景加载 */
+.progressive-background {
+  position: relative;
+  overflow: hidden;
+}
+
+/* 第一阶段：基础背景 (立即加载) */
+.progressive-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--base-bg-color, #f5f5f5);
+  z-index: 1;
+}
+
+/* 第二阶段：简单纹理 (200ms后加载) */
+.progressive-background.texture-loaded::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--simple-texture, none);
+  opacity: 0;
+  animation: textureFadeIn 0.5s ease forwards;
+  z-index: 2;
+}
+
+@keyframes textureFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 第三阶段：完整效果 (500ms后加载) */
+.progressive-background.effects-loaded .bg-effects {
+  opacity: 0;
+  animation: effectsFadeIn 0.8s ease forwards;
+}
+
+@keyframes effectsFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 懒加载背景容器 */
+.lazy-background {
+  position: relative;
+  min-height: 100vh;
+  background: var(--fallback-bg, #f5f5f5);
+  overflow: hidden;
+}
+
+/* 懒加载占位符 */
+.lazy-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--placeholder-gradient, linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0), linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0));
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  z-index: 1;
+}
+
+/* 懒加载内容 */
+.lazy-background .bg-content {
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+/* 懒加载完成状态 */
+.lazy-background.loaded .bg-content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.lazy-background.loaded::before {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* 性能监控类 */
+.performance-monitor {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 9999;
+  font-family: monospace;
+}
+
+/* 动画性能优化 */
+.optimized-animation {
+  /* 使用transform和opacity进行动画 */
+  transform: translateZ(0);
+  will-change: transform, opacity;
+
+  /* 避免重排重绘 */
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* 动画质量控制 */
+.animation-quality-high {
+  animation-duration: 20s;
+  animation-timing-function: ease-in-out;
+}
+
+.animation-quality-medium {
+  animation-duration: 15s;
+  animation-timing-function: linear;
+}
+
+.animation-quality-low {
+  animation-duration: 10s;
+  animation-timing-function: linear;
+}
+
+.animation-quality-none {
+  animation: none !important;
+}
+
+/* 装饰元素性能优化 */
+.optimized-decoration {
+  /* 使用contain属性优化渲染性能 */
+  contain: layout style paint;
+
+  /* 启用硬件加速 */
+  transform: translateZ(0);
+
+  /* 避免不必要的重绘 */
+  will-change: transform;
+}
+
+/* 装饰元素复杂度控制 */
+.effect-complexity-full .optimized-decoration {
+  opacity: 1;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.effect-complexity-reduced .optimized-decoration {
+  opacity: 0.7;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.effect-complexity-minimal .optimized-decoration {
+  opacity: 0.4;
+  backdrop-filter: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* 内存使用优化 */
+.memory-optimized {
+  /* 减少内存使用的样式 */
+  contain: strict;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 0;
+}
+
+/* GPU加速优化 */
+.gpu-accelerated {
+  /* 强制使用GPU加速 */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* 减少重排重绘 */
+.render-optimized {
+  /* 避免影响布局的属性 */
+  will-change: transform, opacity;
+  contain: layout style paint;
+}
+
+/* 响应式图片背景优化 */
+.responsive-bg-image {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* 使用现代图片格式 */
+  background-image: image-set(
+    'bg.avif' type('image/avif'),
+    'bg.webp' type('image/webp'),
+    'bg.jpg' type('image/jpeg')
+  );
+
+  /* 渐进式加载 */
+  background-color: var(--placeholder-color, #f5f5f5);
+}
+
+/* CSS containment优化 */
+.contain-optimized {
+  contain: layout style paint size;
+}
+
+/* 内容可见性优化 */
+.visibility-optimized {
+  content-visibility: auto;
+  contain-intrinsic-size: 100vh 100vw;
+}
+
+/* 滚动性能优化 */
+.scroll-optimized {
+  /* 创建新的堆叠上下文 */
+  transform: translateZ(0);
+
+  /* 优化滚动性能 */
+  overflow-anchor: none;
+  scroll-behavior: smooth;
+}
+
+/* 交互优化 */
+.interaction-optimized {
+  /* 减少点击延迟 */
+  touch-action: manipulation;
+
+  /* 优化交互反馈 */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 网络状态适配 */
+.network-slow .performance-optimized {
+  --performance-level: low;
+  --animation-quality: none;
+  --effect-complexity: minimal;
+}
+
+.network-fast .performance-optimized {
+  --performance-level: high;
+  --animation-quality: high;
+  --effect-complexity: full;
+}
+
+/* 电池状态适配 */
+.battery-low .performance-optimized {
+  --performance-level: medium;
+  --animation-quality: low;
+  --effect-complexity: reduced;
+}
+
+.battery-charging .performance-optimized {
+  --performance-level: high;
+  --animation-quality: high;
+  --effect-complexity: full;
+}
+
+/* 设备内存适配 */
+@media (max-device-memory: 2gb) {
+  .performance-optimized {
+    --performance-level: minimal;
+  }
+}
+
+@media (max-device-memory: 4gb) {
+  .performance-optimized {
+    --performance-level: low;
+  }
+}
+
+@media (max-device-memory: 8gb) {
+  .performance-optimized {
+    --performance-level: medium;
+  }
+}
+
+/* CPU核心数适配 */
+@media (max-resolution: 1dppx) {
+  .performance-optimized {
+    --performance-level: low;
+  }
+}
+
+/* 性能工具类 */
+.disable-animations * {
+  animation: none !important;
+  transition: none !important;
+}
+
+.reduce-effects * {
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.optimize-scrolling {
+  scroll-behavior: smooth;
+  overflow-anchor: none;
+}
+
+/* 预加载关键资源 */
+.preload-critical {
+  display: none;
+}
+
+/* 关键CSS内联优化 */
+.critical-css {
+  display: block;
+}
+
+/* 非关键CSS延迟加载 */
+.non-critical-css {
+  display: none;
+}
+
+.loaded .non-critical-css {
+  display: block;
+}
+
+/* 字体加载优化 */
+.font-optimized {
+  font-display: swap;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* 图标加载优化 */
+.icon-optimized {
+  font-display: block;
+}
+
+/* 背景图片优化策略 */
+.bg-image-optimized {
+  background-color: var(--bg-color, #f5f5f5);
+
+  /* 渐进式图片加载 */
+  background-image:
+    linear-gradient(45deg, transparent 30%, rgba(255,255,255,.5) 50%, transparent 70%),
+    var(--bg-image-low, none);
+
+  background-blend-mode: normal, multiply;
+  background-size: cover, cover;
+  background-position: center, center;
+}
+
+.bg-image-optimized.loaded {
+  background-image: var(--bg-image-high, none);
+}
+
+/* LCP优化 (Largest Contentful Paint) */
+.lcp-optimized {
+  /* 确保关键内容快速渲染 */
+  contain: layout style paint;
+
+  /* 避免布局偏移 */
+  width: 100%;
+  height: 100vh;
+  position: relative;
+}
+
+/* CLS优化 (Cumulative Layout Shift) */
+.cls-optimized {
+  /* 预留空间避免布局偏移 */
+  min-height: 100vh;
+  min-width: 100vw;
+
+  /* 避免内容变化导致的偏移 */
+  contain: layout;
+}
+
+/* FID优化 (First Input Delay) */
+.fid-optimized {
+  /* 快速响应用户交互 */
+  touch-action: manipulation;
+  user-select: none;
+
+  /* 避免长时间运行的JavaScript */
+  will-change: auto;
+}
+
+/* Web Vitals优化指标 */
+.web-vitals-optimized {
+  /* 综合性能优化 */
+  contain: layout style paint size;
+  content-visibility: auto;
+  will-change: transform;
+  transform: translateZ(0);
+}

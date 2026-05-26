@@ -1,0 +1,603 @@
+/**
+ * 跨浏览器兼容性修复方案
+ * 解决不同浏览器中的背景渲染问题
+ */
+
+/* ===== 全局浏览器兼容性修复 ===== */
+
+/* CSS变量回退支持 */
+.browser-compatibility {
+  /* 为不支持CSS变量的浏览器提供回退值 */
+  background: #f5f5f5; /* 回退背景色 */
+}
+
+/* 支持CSS变量的浏览器 */
+@supports (--css: variables) {
+  .browser-compatibility {
+    background: var(--bg-primary, #f5f5f5);
+  }
+}
+
+/* Backdrop Filter兼容性 */
+.backdrop-filter-support {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* 不支持backdrop-filter的浏览器回退 */
+@supports not (backdrop-filter: blur()) {
+  .backdrop-filter-support {
+    background: rgba(255, 255, 255, 0.9);
+  }
+}
+
+/* ===== Chrome/Edge (Blink) 特定修复 ===== */
+
+/* Chrome 88+ 滚动条美化 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary, #f1f5f9);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-primary, #cbd5e1);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted, #94a3b8);
+}
+
+/* Chrome CSS Grid Gap修复 */
+@supports not (gap: 20px) {
+  .grid-gap-fallback {
+    margin: -10px;
+  }
+
+  .grid-gap-fallback > * {
+    margin: 10px;
+  }
+}
+
+/* ===== Firefox (Gecko) 特定修复 ===== */
+
+/* Firefox backdrop-filter支持 */
+@supports (-moz-backdrop-filter: blur()) {
+  .backdrop-filter-support {
+    -moz-backdrop-filter: blur(20px);
+  }
+}
+
+/* Firefox滚动条样式 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-primary, #cbd5e1) var(--bg-secondary, #f1f5f9);
+}
+
+/* Firefox Flexbox gap修复 */
+@supports not (gap: 1rem) {
+  .flex-gap-fallback {
+    margin: -0.5rem;
+  }
+
+  .flex-gap-fallback > * {
+    margin: 0.5rem;
+  }
+}
+
+/* Firefox图片渲染优化 */
+.firefox-image-optimization {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* ===== Safari (WebKit) 特定修复 ===== */
+
+/* Safari CSS变量和渐变组合问题 */
+@supports (background: var(--test)) {
+  .safari-gradient-fix {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    background-attachment: fixed;
+  }
+}
+
+/* Safari Touch设备优化 */
+@supports (-webkit-touch-callout: none) {
+  .safari-touch-optimization {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Safari输入框缩放修复 */
+@supports (-webkit-appearance: none) {
+  .safari-input-fix {
+    -webkit-appearance: none;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="tel"],
+  textarea {
+    font-size: 16px; /* 防止iOS缩放 */
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+}
+
+/* Safari视网膜屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2) {
+  .safari-retina-optimization {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ===== Internet Explorer (虽然已淘汰，但提供基础支持) ===== */
+
+/* IE11 Flexbox回退 */
+@supports not (display: flex) {
+  .ie11-flex-fallback {
+    display: table;
+    width: 100%;
+  }
+
+  .ie11-flex-fallback > * {
+    display: table-cell;
+    vertical-align: middle;
+  }
+}
+
+/* IE11 Grid回退 */
+@supports not (display: grid) {
+  .ie11-grid-fallback {
+    display: block;
+  }
+
+  .ie11-grid-fallback > * {
+    display: inline-block;
+    vertical-align: top;
+  }
+}
+
+/* ===== 通用兼容性修复 ===== */
+
+/* 现代CSS特性检测 */
+@supports (display: grid) {
+  .modern-grid {
+    display: grid;
+  }
+}
+
+@supports (display: flex) {
+  .modern-flex {
+    display: flex;
+  }
+}
+
+@supports (backdrop-filter: blur()) {
+  .modern-backdrop {
+    backdrop-filter: blur(20px);
+  }
+}
+
+@supports (filter: blur()) {
+  .modern-filter {
+    filter: blur(20px);
+  }
+}
+
+@supports (mix-blend-mode: multiply) {
+  .modern-blend {
+    mix-blend-mode: multiply;
+  }
+}
+
+@supports (isolation: isolate) {
+  .modern-isolation {
+    isolation: isolate;
+  }
+}
+
+@supports (contain: layout) {
+  .modern-contain {
+    contain: layout style paint;
+  }
+}
+
+@supports (content-visibility: auto) {
+  .modern-content-visibility {
+    content-visibility: auto;
+  }
+}
+
+/* CSS渐变兼容性 */
+.gradient-fallback {
+  background: var(--bg-primary, #f5f5f5);
+}
+
+@supports (background: linear-gradient(135deg, red, blue)) {
+  .gradient-fallback {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  }
+}
+
+/* CSS动画兼容性 */
+.animation-fallback {
+  /* 为不支持animation的浏览器提供静态样式 */
+  transform: scale(1);
+  opacity: 1;
+}
+
+@supports (animation: test 1s ease) {
+  .animation-fallback {
+    animation: fadeInScale 0.6s ease;
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* CSS Transform3D兼容性 */
+.transform3d-fallback {
+  transform: translateY(0);
+}
+
+@supports (transform: translate3d(0, 0, 0)) {
+  .transform3d-fallback {
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+}
+
+/* CSS Filter兼容性 */
+.filter-fallback {
+  /* 为不支持filter的浏览器提供回退 */
+  background: rgba(255, 255, 255, 0.9);
+}
+
+@supports (filter: blur(10px)) {
+  .filter-fallback {
+    background: rgba(255, 255, 255, 0.7);
+    filter: blur(10px);
+  }
+}
+
+/* CSS Object-fit兼容性 */
+.object-fit-fallback {
+  /* 为不支持object-fit的浏览器提供回退 */
+  background-size: cover;
+  background-position: center;
+}
+
+@supports (object-fit: cover) {
+  .object-fit-fallback {
+    object-fit: cover;
+    font-family: 'object-fit: cover;';
+  }
+}
+
+/* CSS Custom Properties (CSS变量) 兼容性 */
+.vars-fallback {
+  color: #333;
+  background: #fff;
+}
+
+@supports (--css: variables) {
+  .vars-fallback {
+    color: var(--text-primary, #333);
+    background: var(--bg-primary, #fff);
+  }
+}
+
+/* ===== 移动浏览器特定修复 ===== */
+
+/* iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .ios-fixes {
+    -webkit-overflow-scrolling: touch;
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+
+  /* 防止iOS缩放 */
+  .ios-no-zoom {
+    font-size: 16px;
+    transform-origin: left top;
+  }
+}
+
+/* Android Chrome */
+@supports (-webkit-appearance: none) and (not (hover: none)) {
+  .android-fixes {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+  }
+}
+
+/* 移动设备触摸优化 */
+@media (hover: none) and (pointer: coarse) {
+  .touch-optimization {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+  }
+
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ===== 打印样式兼容性 ===== */
+@media print {
+  .print-fallback {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .print-hidden {
+    display: none !important;
+  }
+}
+
+/* ===== 高对比度模式兼容性 ===== */
+@media (prefers-contrast: high) {
+  .high-contrast-fallback {
+    border-width: 2px;
+    font-weight: 600;
+  }
+}
+
+/* ===== 减少动画偏好兼容性 ===== */
+@media (prefers-reduced-motion: reduce) {
+  .reduced-motion-fallback {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* ===== 性能优化兼容性 ===== */
+
+/* GPU加速兼容性 */
+.gpu-acceleration {
+  /* 现代浏览器 */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+
+  /* 回退方案 */
+  transform: translateZ(0);
+}
+
+@supports not (transform: translate3d(0, 0, 0)) {
+  .gpu-acceleration {
+    transform: translateZ(0);
+  }
+}
+
+/* CSS Containment兼容性 */
+.containment-fallback {
+  /* 现代浏览器 */
+  contain: layout style paint;
+}
+
+@supports not (contain: layout) {
+  .containment-fallback {
+    /* 回退：使用will-change */
+    will-change: transform, opacity;
+  }
+}
+
+@supports not (contain: layout) and (not (will-change: auto)) {
+  .containment-fallback {
+    /* 最终回退：移除所有优化属性 */
+    /* 确保在老旧浏览器中正常显示 */
+  }
+}
+
+/* Intersection Observer兼容性 */
+.intersection-observer-fallback {
+  /* 为不支持Intersection Observer的浏览器提供回退 */
+  opacity: 1;
+}
+
+/* Resize Observer兼容性 */
+.resize-observer-fallback {
+  /* 为不支持Resize Observer的浏览器提供回退 */
+  width: 100%;
+  height: auto;
+}
+
+/* ===== 字体加载兼容性 ===== */
+
+/* 字体显示策略 */
+.font-display-fallback {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+@supports (font-display: swap) {
+  .font-display-fallback {
+    font-family: 'Custom Font', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-display: swap;
+  }
+}
+
+/* CSS @supports嵌套兼容性 */
+@supports (backdrop-filter: blur()) {
+  .nested-supports {
+    backdrop-filter: blur(20px);
+  }
+
+  @supports (mix-blend-mode: multiply) {
+    .nested-supports {
+      backdrop-filter: blur(20px);
+      mix-blend-mode: multiply;
+    }
+  }
+}
+
+/* 渐进增强模式 */
+.progressive-enhancement {
+  /* 基础样式 */
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+
+  /* 现代浏览器增强 */
+  @supports (backdrop-filter: blur()) {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  @supports (box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1)) {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  @supports (transform: translateY(-2px)) {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  @supports (transform: translateY(-2px)) and (hover: hover) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+/* ===== 错误处理兼容性 ===== */
+
+/* CSS解析错误处理 */
+.error-tolerant {
+  /* 使用安全的属性值 */
+  background: #f5f5f5;
+  background: var(--bg-primary, #f5f5f5);
+  background: linear-gradient(135deg, var(--bg-primary, #f5f5f5) 0%, var(--bg-secondary, #ffffff) 100%);
+}
+
+/* JavaScript依赖的CSS样式 */
+.js-dependent {
+  /* 默认状态 */
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* JavaScript可用时的状态 */
+.js-loaded .js-dependent {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 图片加载失败回退 */
+.image-fallback {
+  background: #f5f5f5;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.image-fallback::before {
+  content: "图片加载失败";
+}
+
+/* ===== 兼容性测试工具类 ===== */
+
+/* 用于测试特定CSS特性支持 */
+.test-supports {
+  display: none;
+}
+
+@supports (display: grid) {
+  .test-supports.grid-supported {
+    display: block;
+  }
+}
+
+@supports (backdrop-filter: blur()) {
+  .test-supports.backdrop-supported {
+    display: block;
+  }
+}
+
+@supports (custom-property: --test) {
+  .test-supports.vars-supported {
+    display: block;
+  }
+}
+
+/* 用于测试浏览器版本 */
+.test-browser {
+  display: none;
+}
+
+@supports (-webkit-appearance: none) {
+  .test-browser.webkit {
+    display: block;
+  }
+}
+
+@supports (-moz-appearance: none) {
+  .test-browser.gecko {
+    display: block;
+  }
+}
+
+/* ===== 维护模式样式 ===== */
+
+.maintenance-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #f8f9fa;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.maintenance-content {
+  text-align: center;
+  max-width: 400px;
+  padding: 2rem;
+}
+
+.maintenance-content h1 {
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.maintenance-content p {
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}

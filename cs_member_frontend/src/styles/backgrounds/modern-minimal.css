@@ -1,0 +1,201 @@
+/**
+ * 现代简约风格背景样式
+ * 特点：清爽、专业、适合商务场景
+ * 色彩：浅灰、白色、淡蓝
+ * 适用：会员端、管理端通用
+ */
+
+/* 现代简约主题变量 */
+:root {
+  --modern-bg-primary: #f8fafc;
+  --modern-bg-secondary: #ffffff;
+  --modern-bg-accent: #e2e8f0;
+  --modern-text-primary: #1e293b;
+  --modern-text-secondary: #64748b;
+  --modern-brand-primary: #3b82f6;
+  --modern-brand-secondary: #0ea5e9;
+  --modern-shadow-light: rgba(0, 0, 0, 0.05);
+  --modern-shadow-medium: rgba(0, 0, 0, 0.1);
+  --modern-shadow-heavy: rgba(0, 0, 0, 0.15);
+  --modern-gradient-subtle: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+/* 现代简约背景容器 */
+.modern-background {
+  min-height: 100vh;
+  background: var(--modern-gradient-subtle);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 几何装饰元素 */
+.modern-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(14, 165, 233, 0.03) 0%, transparent 50%),
+    linear-gradient(45deg, rgba(226, 232, 240, 0.5) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(226, 232, 240, 0.5) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(226, 232, 240, 0.5) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(226, 232, 240, 0.5) 75%);
+  background-size:
+    800px 800px,
+    600px 600px,
+    40px 40px,
+    40px 40px,
+    40px 40px,
+    40px 40px;
+  background-position:
+    0% 0%,
+    100% 100%,
+    0% 0%,
+    0% 0%,
+    20px 20px,
+    20px 20px;
+  animation: modernSubtleMove 20s ease-in-out infinite;
+}
+
+@keyframes modernSubtleMove {
+  0%, 100% {
+    background-position:
+      0% 0%,
+      100% 100%,
+      0% 0%,
+      0% 0%,
+      20px 20px,
+      20px 20px;
+  }
+  50% {
+    background-position:
+      50% 50%,
+      50% 50%,
+      10px 10px,
+      10px 10px,
+      30px 30px,
+      30px 30px;
+  }
+}
+
+/* 现代简约登录框 */
+.modern-login-box {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(59, 130, 246, 0.1) inset;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.modern-login-box:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(59, 130, 246, 0.2) inset;
+}
+
+/* 浮动装饰元素 */
+.modern-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.modern-shape {
+  position: absolute;
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+}
+
+.modern-shape-1 {
+  width: 200px;
+  height: 200px;
+  top: 10%;
+  left: 10%;
+  animation: modernFloat 15s ease-in-out infinite;
+}
+
+.modern-shape-2 {
+  width: 150px;
+  height: 150px;
+  top: 60%;
+  right: 15%;
+  animation: modernFloat 12s ease-in-out infinite reverse;
+}
+
+.modern-shape-3 {
+  width: 100px;
+  height: 100px;
+  bottom: 20%;
+  left: 30%;
+  animation: modernFloat 18s ease-in-out infinite;
+}
+
+@keyframes modernFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+    opacity: 0.6;
+  }
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .modern-background::before {
+    background-size:
+      400px 400px,
+      300px 300px,
+      20px 20px,
+      20px 20px,
+      20px 20px,
+      20px 20px;
+  }
+
+  .modern-shape-1,
+  .modern-shape-2,
+  .modern-shape-3 {
+    display: none;
+  }
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --modern-bg-primary: #0f172a;
+    --modern-bg-secondary: #1e293b;
+    --modern-bg-accent: #334155;
+    --modern-text-primary: #f1f5f9;
+    --modern-text-secondary: #cbd5e1;
+    --modern-brand-primary: #60a5fa;
+    --modern-brand-secondary: #38bdf8;
+    --modern-shadow-light: rgba(0, 0, 0, 0.3);
+    --modern-shadow-medium: rgba(0, 0, 0, 0.5);
+    --modern-shadow-heavy: rgba(0, 0, 0, 0.7);
+    --modern-gradient-subtle: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  }
+
+  .modern-login-box {
+    background: rgba(30, 41, 59, 0.95);
+    border: 1px solid rgba(51, 65, 85, 0.8);
+  }
+
+  .modern-shape {
+    background: rgba(96, 165, 250, 0.08);
+    border: 1px solid rgba(96, 165, 250, 0.2);
+  }
+}

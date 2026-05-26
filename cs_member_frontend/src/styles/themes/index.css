@@ -1,0 +1,110 @@
+/**
+ * 主题系统样式导入文件
+ * 导入所有主题样式文件
+ */
+
+@import './modern-theme.css';
+@import './convenience-theme.css';
+@import './tech-theme.css';
+
+/* 主题切换过渡动画 */
+.theme-transition * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* 主题基础样式 */
+body {
+  transition: all 0.3s ease;
+}
+
+/* 确保主题样式优先级 */
+.theme-modern .login-container,
+.theme-convenience .login-container,
+.theme-tech .login-container {
+  transition: background 0.6s ease;
+}
+
+.theme-modern .login-box,
+.theme-convenience .login-box,
+.theme-tech .login-box {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 主题切换时的特殊动画效果 */
+.theme-switching {
+  position: relative;
+}
+
+.theme-switching::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  animation: themeSwitchFlash 0.6s ease-out;
+}
+
+@keyframes themeSwitchFlash {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* 装饰元素基础样式 */
+.geometric-decoration,
+.store-decoration,
+.tech-decoration {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 性能优化：减少重绘 */
+.theme-modern .login-container,
+.theme-convenience .login-container,
+.theme-tech .login-container {
+  will-change: background;
+}
+
+.theme-modern .login-box,
+.theme-convenience .login-box,
+.theme-tech .login-box {
+  will-change: transform, box-shadow;
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .theme-modern .login-box,
+  .theme-convenience .login-box,
+  .theme-tech .login-box {
+    background: rgba(30, 30, 30, 0.95);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .theme-modern .login-container::before,
+  .theme-convenience .login-container::before,
+  .theme-tech .login-container::before,
+  .geometric-decoration,
+  .store-decoration,
+  .tech-decoration {
+    animation: none !important;
+  }
+}
+
+.theme-modern .login-box,
+.theme-convenience .login-box,
+.theme-tech .login-box {
+  transition: none !important;
+}
+
+.theme-modern .login-box:hover,
+.theme-convenience .login-box:hover,
+.theme-tech .login-box:hover {
+  transform: none !important;
+}

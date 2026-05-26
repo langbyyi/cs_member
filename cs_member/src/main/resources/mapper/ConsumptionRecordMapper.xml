@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cloud.hilang.cs_member.mapper.ConsumptionRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cloud.hilang.cs_member.entity.ConsumptionRecord">
+        <id column="id" property="id" />
+        <result column="consumption_no" property="consumptionNo" />
+        <result column="member_id" property="memberId" />
+        <result column="store_id" property="storeId" />
+        <result column="operator_id" property="operatorId" />
+        <result column="consumption_type" property="consumptionType" />
+        <result column="total_amount" property="totalAmount" />
+        <result column="discount_amount" property="discountAmount" />
+        <result column="points_earned" property="pointsEarned" />
+        <result column="points_used" property="pointsUsed" />
+        <result column="coupon_id" property="couponId" />
+        <result column="payment_method" property="paymentMethod" />
+        <result column="consumption_time" property="consumptionTime" />
+        <result column="status" property="status" />
+        <result column="cancel_reason" property="cancelReason" />
+        <result column="refund_reason" property="refundReason" />
+        <result column="remark" property="remark" />
+        <result column="created_time" property="createdTime" />
+    </resultMap>
+
+    <!-- 包含会员信息的消费记录映射结果 -->
+    <resultMap id="ConsumptionRecordWithMemberResultMap" type="cloud.hilang.cs_member.entity.ConsumptionRecord" extends="BaseResultMap">
+        <!-- 这里可以添加会员相关的额外字段映射，如果实体类中有的话 -->
+        <!-- 目前实体类中没有会员名称等字段，如果需要展示，建议在实体类中添加 @TableField(exist=false) 字段 -->
+    </resultMap>
+
+    <!-- 获取每日统计数据 -->
+    <select id="getDailyStats" resultType="java.util.Map">
+        SELECT
+            COUNT(*) as orderCount,
+            COALESCE(SUM(total_amount), 0) as revenue
+        FROM consumption_record
+        WHERE consumption_time BETWEEN #{startTime} AND #{endTime}
+        AND status = 'completed'
+        <if test="storeId != null">
+            AND store_id = #{storeId}
+        </if>
+    </select>
+
+    <!-- 获取支付方式统计 -->
+    <select id="getPaymentMethodStats" resultType="java.util.Map">
+        SELECT
+            payment_method as paymentMethod,
+            COUNT(*) as count
+        FROM consumption_record
+        WHERE consumption_time BETWEEN #{startTime} AND #{endTime}
+        AND status = 'completed'
+        AND payment_method IS NOT NULL
+        <if test="storeId != null">
+            AND store_id = #{storeId}
+        </if>
+        GROUP BY payment_method
+        ORDER BY count DESC
+    </select>
+
+    <!-- 获取消费时段统计 -->
+    <select id="getConsumptionTimeStats" resultType="java.util.Map">
+        SELECT
+            HOUR(consumption_time) as hour,
+            COUNT(*) as count,
+            COALESCE(SUM(total_amount), 0) as amount
+        FROM consumption_record
+        WHERE consumption_time BETWEEN #{startTime} AND #{endTime}
+        AND status = 'completed'
+        <if test="storeId != null">
+            AND store_id = #{storeId}
+        </if>
+        GROUP BY HOUR(consumption_time)
+        ORDER BY hour
+    </select>
+
+    <!-- 获取最新动态 -->
+    <select id="getRecentActivities" resultType="java.util.Map">
+        SELECT
+            cr.id,
+            cr.consumption_no as consumptionNo,
+            cr.total_amount as amount,
+            cr.consumption_time as createTime,
+            cr.payment_method as paymentMethod,
+            m.name as memberName,
+            m.phone as memberPhone,
+            s.store_name as storeName
+        FROM consumption_record cr
+        LEFT JOIN member m ON cr.member_id = m.id
+        LEFT JOIN store s ON cr.store_id = s.id
+        WHERE cr.status = 'completed'
+        <if test="storeId != null">
+            AND cr.store_id = #{storeId}
+        </if>
+        ORDER BY cr.consumption_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 获取业务统计数据 -->
+    <select id="getBusinessStatistics" resultType="java.util.Map">
+        SELECT
+            COUNT(*) as totalOrders,
+            COALESCE(SUM(total_amount), 0) as totalRevenue,
+            COALESCE(AVG(total_amount), 0) as averageOrderValue,
+            COUNT(DISTINCT member_id) as uniqueMembers
+        FROM consumption_record
+        WHERE consumption_time BETWEEN #{startTime} AND #{endTime}
+        AND status = 'completed'
+        <if test="storeId != null">
+            AND store_id = #{storeId}
+        </if>
+    </select>
+
+    <!-- 根据日期范围统计订单数量 -->
+    <select id="countByDateRange" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM consumption_record
+        WHERE consumption_time BETWEEN #{startTime} AND #{endTime}
+        AND status = 'completed'
+        <if test="storeId != null">
+            AND store_id = #{storeId}
+        </if>
+    </select>
+
+    <!-- 根据门店统计订单数量 -->
+    <select id="countByStore" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM consumption_record
+        WHERE status = 'completed'
+        <if test="storeId != null">
+            AND store_id = #{storeId}
+        </if>
+    </select>
+
+    <!-- 根据日期范围统计营收 -->
+    <select id="getRevenueByDateRange" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(total_amount), 0)
+        FROM consumption_record
+        WHERE consumption_time BETWEEN #{startTime} AND #{endTime}
+        AND status = 'completed'
+        <if test="storeId != null">
+            AND store_id = #{storeId}
+        </if>
+    </select>
+
+    <!-- 根据门店统计总营收 -->
+    <select id="getRevenueByStore" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(total_amount), 0)
+        FROM consumption_record
+        WHERE status = 'completed'
+        <if test="storeId != null">
+            AND store_id = #{storeId}
+        </if>
+    </select>
+
+    <!-- 获取活跃会员数量（指定时间范围内有消费的会员） -->
+    <select id="getActiveMemberCount" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT member_id)
+        FROM consumption_record
+        WHERE consumption_time BETWEEN #{startTime} AND #{endTime}
+        AND status = 'completed'
+        AND member_id IS NOT NULL
+        <if test="storeId != null">
+            AND store_id = #{storeId}
+        </if>
+    </select>
+
+
+
+    <!-- 分页查询消费记录列表 -->
+    <select id="selectConsumptionRecordList" resultMap="BaseResultMap">
+        SELECT cr.*
+        FROM consumption_record cr
+        LEFT JOIN member m ON cr.member_id = m.id
+        <where>
+            <if test="memberNo != null and memberNo != ''">
+                AND m.member_no LIKE CONCAT('%', #{memberNo}, '%')
+            </if>
+            <if test="memberName != null and memberName != ''">
+                AND m.name LIKE CONCAT('%', #{memberName}, '%')
+            </if>
+            <if test="consumptionNo != null and consumptionNo != ''">
+                AND cr.consumption_no LIKE CONCAT('%', #{consumptionNo}, '%')
+            </if>
+            <if test="paymentMethod != null and paymentMethod != ''">
+                AND cr.payment_method = #{paymentMethod}
+            </if>
+            <if test="startDate != null">
+                AND cr.consumption_time &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND cr.consumption_time &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY cr.consumption_time DESC
+    </select>
+
+    <!-- 按月统计营收数据 -->
+    <select id="getMonthlyRevenue" resultType="java.util.Map">
+        SELECT
+            DATE_FORMAT(consumption_time, '%Y-%m') as month,
+            COUNT(*) as orderCount,
+            COALESCE(SUM(total_amount), 0) as revenue
+        FROM consumption_record
+        WHERE status = 'completed'
+        <if test="startTime != null">
+            AND consumption_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND consumption_time &lt;= #{endTime}
+        </if>
+        GROUP BY DATE_FORMAT(consumption_time, '%Y-%m')
+        ORDER BY month ASC
+    </select>
+
+    <!-- 按月统计消费会员数 -->
+    <select id="getMonthlyMemberGrowth" resultType="java.util.Map">
+        SELECT
+            DATE_FORMAT(created_time, '%Y-%m') as month,
+            COUNT(*) as newMembers
+        FROM member
+        <where>
+            <if test="startTime != null">
+                AND created_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND created_time &lt;= #{endTime}
+            </if>
+        </where>
+        GROUP BY DATE_FORMAT(created_time, '%Y-%m')
+        ORDER BY month ASC
+    </select>
+
+</mapper>

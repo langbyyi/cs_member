@@ -1,0 +1,333 @@
+/**
+ * 便利店主题背景样式
+ * 特点：温暖、亲切、体现便利店特色
+ * 色彩：橙色、黄色、暖色调
+ * 适用：会员端专用
+ */
+
+/* 便利店主题变量 */
+:root {
+  --store-bg-primary: #fff7ed;
+  --store-bg-secondary: #fef3c7;
+  --store-bg-accent: #fed7aa;
+  --store-text-primary: #1f2937;
+  --store-text-secondary: #4b5563;
+  --store-brand-primary: #f59e0b;
+  --store-brand-secondary: #f97316;
+  --store-brand-accent: #ef4444;
+  --store-shadow-warm: rgba(245, 158, 11, 0.1);
+  --store-shadow-medium: rgba(245, 158, 11, 0.2);
+  --store-shadow-heavy: rgba(245, 158, 11, 0.3);
+  --store-gradient-warm: linear-gradient(135deg, #fff7ed 0%, #fef3c7 50%, #fed7aa 100%);
+}
+
+/* 便利店主题背景容器 */
+.store-background {
+  min-height: 100vh;
+  background: var(--store-gradient-warm);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 便利店元素装饰 */
+.store-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(245, 158, 11, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 30%, rgba(249, 115, 22, 0.06) 0%, transparent 35%),
+    radial-gradient(circle at 40% 70%, rgba(239, 68, 68, 0.04) 0%, transparent 30%),
+    radial-gradient(circle at 70% 85%, rgba(245, 158, 11, 0.05) 0%, transparent 25%);
+  animation: storeAmbient 25s ease-in-out infinite;
+}
+
+@keyframes storeAmbient {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+/* 便利店图标装饰网格 */
+.store-background::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23f59e0b' fill-opacity='0.03'%3E%3Cpath d='M20 20c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm-6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm12 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23f97316' fill-opacity='0.02'%3E%3Cpath d='M30 30c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm-8 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm16 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 40px 40px, 60px 60px;
+  background-position: 0 0, 20px 20px;
+  opacity: 0.4;
+  animation: storePatternMove 30s linear infinite;
+}
+
+@keyframes storePatternMove {
+  0% {
+    background-position: 0 0, 20px 20px;
+  }
+  100% {
+    background-position: 40px 40px, 80px 80px;
+  }
+}
+
+/* 便利店主题登录框 */
+.store-login-box {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(245, 158, 11, 0.2);
+  box-shadow:
+    0 25px 50px rgba(245, 158, 11, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset,
+    0 8px 16px rgba(245, 158, 11, 0.1) inset;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.store-login-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #f59e0b 0%, #f97316 25%, #ef4444 50%, #f97316 75%, #f59e0b 100%);
+  background-size: 200% 100%;
+  animation: storeShimmer 4s ease-in-out infinite;
+}
+
+@keyframes storeShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.store-login-box:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 35px 70px rgba(245, 158, 11, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+    0 12px 24px rgba(245, 158, 11, 0.15) inset;
+}
+
+/* 便利店特色装饰元素 */
+.store-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 购物车图标装饰 */
+.store-icon-1 {
+  position: absolute;
+  top: 15%;
+  left: 10%;
+  width: 80px;
+  height: 80px;
+  opacity: 0.15;
+  animation: storeIconFloat 20s ease-in-out infinite;
+}
+
+.store-icon-1::before {
+  content: '🛒';
+  font-size: 60px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 便利店建筑图标装饰 */
+.store-icon-2 {
+  position: absolute;
+  top: 60%;
+  right: 12%;
+  width: 100px;
+  height: 100px;
+  opacity: 0.12;
+  animation: storeIconFloat 25s ease-in-out infinite reverse;
+}
+
+.store-icon-2::before {
+  content: '🏪';
+  font-size: 80px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 24小时营业图标装饰 */
+.store-icon-3 {
+  position: absolute;
+  bottom: 20%;
+  left: 20%;
+  width: 60px;
+  height: 60px;
+  opacity: 0.1;
+  animation: storeIconFloat 18s ease-in-out infinite;
+}
+
+.store-icon-3::before {
+  content: '🕐';
+  font-size: 50px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes storeIconFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-15px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(-25px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-15px) rotate(-5deg);
+  }
+}
+
+/* 暖光效果 */
+.store-glow-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center top,
+    rgba(245, 158, 11, 0.1) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 温暖色块装饰 */
+.store-warm-blocks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.store-warm-block {
+  position: absolute;
+  border-radius: 12px;
+  opacity: 0.08;
+  backdrop-filter: blur(5px);
+}
+
+.store-warm-block-1 {
+  width: 200px;
+  height: 120px;
+  top: 25%;
+  left: 5%;
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  animation: storeBlockMove 15s ease-in-out infinite;
+}
+
+.store-warm-block-2 {
+  width: 150px;
+  height: 180px;
+  top: 55%;
+  right: 8%;
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+  animation: storeBlockMove 20s ease-in-out infinite reverse;
+}
+
+.store-warm-block-3 {
+  width: 100px;
+  height: 100px;
+  bottom: 15%;
+  left: 35%;
+  background: linear-gradient(135deg, #ef4444 0%, #f59e0b 100%);
+  animation: storeBlockMove 18s ease-in-out infinite;
+}
+
+@keyframes storeBlockMove {
+  0%, 100% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 0.08;
+  }
+  33% {
+    transform: translateY(-20px) translateX(10px) rotate(5deg);
+    opacity: 0.12;
+  }
+  66% {
+    transform: translateY(-10px) translateX(-10px) rotate(-5deg);
+    opacity: 0.1;
+  }
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .store-background::after {
+    background-size: 30px 30px, 45px 45px;
+  }
+
+  .store-icon-1,
+  .store-icon-2,
+  .store-icon-3,
+  .store-warm-block-1,
+  .store-warm-block-2,
+  .store-warm-block-3 {
+    display: none;
+  }
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --store-bg-primary: #1c1917;
+    --store-bg-secondary: #292524;
+    --store-bg-accent: #44403c;
+    --store-text-primary: #fafaf9;
+    --store-text-secondary: #d6d3d1;
+    --store-brand-primary: #fbbf24;
+    --store-brand-secondary: #fb923c;
+    --store-brand-accent: #f87171;
+    --store-shadow-warm: rgba(251, 191, 36, 0.2);
+    --store-shadow-medium: rgba(251, 191, 36, 0.3);
+    --store-shadow-heavy: rgba(251, 191, 36, 0.4);
+    --store-gradient-warm: linear-gradient(135deg, #1c1917 0%, #292524 50%, #44403c 100%);
+  }
+
+  .store-login-box {
+    background: rgba(41, 37, 36, 0.92);
+    border: 2px solid rgba(251, 191, 36, 0.3);
+  }
+
+  .store-icon-1,
+  .store-icon-2,
+  .store-icon-3 {
+    opacity: 0.08;
+  }
+}

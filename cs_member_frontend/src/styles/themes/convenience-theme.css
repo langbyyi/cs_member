@@ -1,0 +1,276 @@
+/**
+ * 便利店主题
+ * 温暖橙黄色调，便利店营业氛围
+ */
+
+/* 便利店主题背景 */
+.theme-convenience .login-container {
+  background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-convenience .login-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 35%),
+    linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.05) 75%);
+  background-size: 200% 200%, 20px 20px;
+  animation: convenienceMove 20s linear infinite;
+}
+
+@keyframes convenienceMove {
+  0% { background-position: 0% 0%, 10px 10px; }
+  100% { background-position: 200px 200px, 210px 210px; }
+}
+
+/* 便利店主题登录框 */
+.theme-convenience .login-box {
+  background: var(--card-background);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--login-box-shadow);
+  border-radius: 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 10;
+}
+
+.theme-convenience .login-box:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow);
+}
+
+/* 便利店主题登录框顶部装饰 */
+.theme-convenience .login-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent 0%, var(--primary-color) 50%, transparent 100%);
+  border-radius: 12px 12px 0 0;
+}
+
+/* 便利店主题Logo */
+.theme-convenience .logo-placeholder {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  box-shadow: 0 8px 24px rgba(255, 152, 0, 0.3);
+  position: relative;
+}
+
+/* 便利店Logo 24H 标识 */
+.theme-convenience .logo-placeholder::after {
+  content: '24H';
+  position: absolute;
+  bottom: -8px;
+  right: -8px;
+  background: var(--secondary-color);
+  color: white;
+  font-size: 8px;
+  font-weight: bold;
+  padding: 2px 4px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 便利店主题输入框 */
+.theme-convenience .login-form :deep(.el-input__wrapper) {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.theme-convenience .login-form :deep(.el-input__wrapper:hover) {
+  border-color: #ffb74d;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.08);
+}
+
+.theme-convenience .login-form :deep(.el-input__wrapper.is-focus) {
+  border-color: var(--input-focus-color);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.25);
+}
+
+/* 便利店主题按钮 */
+.theme-convenience .login-btn {
+  background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+  border: none;
+  color: white;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-convenience .login-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.theme-convenience .login-btn:hover::before {
+  left: 100%;
+}
+
+.theme-convenience .login-btn:hover {
+  transform: var(--button-hover-transform);
+  box-shadow: 0 12px 32px rgba(255, 152, 0, 0.45);
+}
+
+/* 便利店主题链接 */
+.theme-convenience .forgot-password,
+.theme-convenience .register-link .link,
+.theme-convenience .member-link .link {
+  color: var(--primary-color);
+  transition: all 0.3s ease;
+}
+
+.theme-convenience .forgot-password:hover,
+.theme-convenience .register-link .link:hover,
+.theme-convenience .member-link .link:hover {
+  color: var(--secondary-color);
+  transform: translateY(-1px);
+}
+
+/* 便利店装饰元素 */
+.theme-convenience .store-decoration {
+  position: absolute;
+  pointer-events: none;
+}
+
+.theme-convenience .store-icon-shopping-cart {
+  position: absolute;
+  top: 15%;
+  left: 10%;
+  width: 60px;
+  height: 60px;
+  opacity: 0.1;
+  animation: floatCart 8s ease-in-out infinite;
+}
+
+.theme-convenience .store-icon-shopping-cart::before {
+  content: '🛒';
+  font-size: 60px;
+}
+
+.theme-convenience .store-icon-coffee {
+  position: absolute;
+  top: 20%;
+  right: 15%;
+  width: 50px;
+  height: 50px;
+  opacity: 0.1;
+  animation: floatCoffee 6s ease-in-out infinite;
+}
+
+.theme-convenience .store-icon-coffee::before {
+  content: '☕';
+  font-size: 50px;
+}
+
+.theme-convenience .store-icon-box {
+  position: absolute;
+  bottom: 20%;
+  left: 15%;
+  width: 45px;
+  height: 45px;
+  opacity: 0.1;
+  animation: floatBox 7s ease-in-out infinite;
+}
+
+.theme-convenience .store-icon-box::before {
+  content: '📦';
+  font-size: 45px;
+}
+
+.theme-convenience .store-badge-24h {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  background: var(--secondary-color);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes floatCart {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(5deg); }
+}
+
+@keyframes floatCoffee {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(-3deg); }
+}
+
+@keyframes floatBox {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(2deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+/* 温暖色调装饰 */
+.theme-convenience .warm-gradient-orb {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 152, 0, 0.1) 0%, transparent 70%);
+  top: -150px;
+  right: -150px;
+  animation: warmOrb 15s ease-in-out infinite;
+}
+
+.theme-convenience .warm-gradient-orb-2 {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 87, 34, 0.08) 0%, transparent 70%);
+  bottom: -100px;
+  left: -100px;
+  animation: warmOrb 12s ease-in-out infinite reverse;
+}
+
+@keyframes warmOrb {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.6; }
+  50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .theme-convenience .store-decoration {
+    display: none;
+  }
+
+  .theme-convenience .store-badge-24h {
+    top: 15px;
+    right: 15px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}

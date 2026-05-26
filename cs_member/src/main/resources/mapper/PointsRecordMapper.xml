@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cloud.hilang.cs_member.mapper.PointsRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cloud.hilang.cs_member.entity.PointsRecord">
+        <id column="id" property="id" />
+        <result column="member_id" property="memberId" />
+        <result column="change_type" property="changeType" />
+        <result column="points_change" property="pointsChange" />
+        <result column="points_before" property="pointsBefore" />
+        <result column="points_after" property="pointsAfter" />
+        <result column="change_reason" property="changeReason" />
+        <result column="reference_type" property="referenceType" />
+        <result column="reference_id" property="referenceId" />
+        <result column="store_id" property="storeId" />
+        <result column="operator_id" property="operatorId" />
+        <result column="operator_name" property="operatorName" />
+        <result column="expire_time" property="expireTime" />
+        <result column="record_time" property="recordTime" />
+    </resultMap>
+
+    <!-- 包含会员信息的积分记录映射结果 -->
+    <resultMap id="PointsRecordWithMemberResultMap" type="cloud.hilang.cs_member.entity.PointsRecord">
+        <id column="id" property="id" />
+        <result column="member_id" property="memberId" />
+        <result column="member_no" property="memberNo" />
+        <result column="member_name" property="memberName" />
+        <result column="change_type" property="changeType" />
+        <result column="points_type" property="pointsType" />
+        <result column="points_type_name" property="pointsTypeName" />
+        <result column="points" property="points" />
+        <result column="points_before" property="beforePoints" />
+        <result column="points_after" property="afterPoints" />
+        <result column="description" property="description" />
+        <result column="change_reason" property="changeReason" />
+        <result column="reference_type" property="referenceType" />
+        <result column="reference_id" property="referenceId" />
+        <result column="store_id" property="storeId" />
+        <result column="operator_id" property="operatorId" />
+        <result column="operator_name" property="operatorName" />
+        <result column="expire_time" property="expireTime" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, member_id, change_type, points_change, points_before, points_after,
+        change_reason, reference_type, reference_id, store_id, operator_id,
+        operator_name, expire_time, record_time
+    </sql>
+
+    <!-- 根据会员ID查询积分记录 -->
+    <select id="selectByMemberId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM points_record
+        WHERE member_id = #{memberId,jdbcType=BIGINT}
+        ORDER BY record_time DESC
+    </select>
+
+    <!-- 创建积分记录 -->
+    <insert id="insertPointsRecord" parameterType="cloud.hilang.cs_member.entity.PointsRecord" useGeneratedKeys="true" keyProperty="pointsRecord.id">
+        INSERT INTO points_record (
+            member_id, change_type, points_change, points_before, points_after,
+            change_reason, reference_type, reference_id, store_id, operator_id,
+            operator_name, expire_time, record_time
+        ) VALUES (
+            #{pointsRecord.memberId,jdbcType=BIGINT},
+            #{pointsRecord.changeType,jdbcType=VARCHAR},
+            #{pointsRecord.pointsChange,jdbcType=INTEGER},
+            #{pointsRecord.pointsBefore,jdbcType=INTEGER},
+            #{pointsRecord.pointsAfter,jdbcType=INTEGER},
+            #{pointsRecord.changeReason,jdbcType=VARCHAR},
+            #{pointsRecord.referenceType,jdbcType=VARCHAR},
+            #{pointsRecord.referenceId,jdbcType=BIGINT},
+            #{pointsRecord.storeId,jdbcType=BIGINT},
+            #{pointsRecord.operatorId,jdbcType=BIGINT},
+            #{pointsRecord.operatorName,jdbcType=VARCHAR},
+            #{pointsRecord.expireTime,jdbcType=TIMESTAMP},
+            #{pointsRecord.recordTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <!-- 查询会员当前总积分 -->
+    <select id="selectCurrentPointsByMemberId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(points_change), 0)
+        FROM points_record
+        WHERE member_id = #{memberId,jdbcType=BIGINT}
+          AND (expire_time IS NULL OR expire_time > NOW())
+    </select>
+
+    <!-- 分页查询积分记录列表（管理员视角，包含会员信息） -->
+    <select id="selectPointsRecordList" resultMap="PointsRecordWithMemberResultMap">
+        SELECT
+            pr.id,
+            pr.member_id,
+            m.member_no,
+            m.name as member_name,
+            CASE
+                WHEN pr.points_change > 0 THEN 1
+                ELSE 2
+            END as points_type,
+            CASE
+                WHEN pr.points_change > 0 THEN '获得'
+                ELSE '使用'
+            END as points_type_name,
+            ABS(pr.points_change) as points,
+            pr.points_before as beforePoints,
+            pr.points_after as afterPoints,
+            COALESCE(pr.change_reason, pr.reference_type) as description,
+            pr.change_reason,
+            pr.reference_type,
+            pr.reference_id,
+            pr.store_id,
+            pr.operator_id,
+            pr.operator_name,
+            pr.expire_time,
+            pr.record_time as create_time
+        FROM points_record pr
+        LEFT JOIN member m ON pr.member_id = m.id
+        <where>
+            <if test="memberNo != null and memberNo != ''">
+                AND m.member_no LIKE CONCAT('%', #{memberNo}, '%')
+            </if>
+            <if test="memberName != null and memberName != ''">
+                AND m.name LIKE CONCAT('%', #{memberName}, '%')
+            </if>
+            <if test="changeType != null and changeType != ''">
+                AND (
+                    <choose>
+                        <when test="changeType == 'increase'">
+                            pr.points_change > 0
+                        </when>
+                        <when test="changeType == 'decrease'">
+                            pr.points_change &lt; 0
+                        </when>
+                        <otherwise>
+                            1=1
+                        </otherwise>
+                    </choose>
+                )
+            </if>
+            <if test="startDate != null">
+                AND pr.record_time &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND pr.record_time &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY pr.record_time DESC
+    </select>
+
+    <!-- 根据过期时间查询过期积分记录 -->
+    <select id="selectExpiredPoints" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM points_record
+        WHERE expire_time IS NOT NULL
+          AND expire_time &lt;= NOW()
+          AND change_type = 'earn'
+    </select>
+
+    <!-- 获取积分统计数据 -->
+    <select id="selectPointsStatistics" resultType="java.util.Map">
+        SELECT
+            COUNT(DISTINCT pr.member_id) as totalMembers,
+            COALESCE(SUM(CASE WHEN pr.points_change > 0 THEN pr.points_change ELSE 0 END), 0) as totalPoints,
+            COALESCE(AVG(m.current_points), 0) as averagePoints,
+            COUNT(DISTINCT CASE WHEN pr.record_time >= DATE_FORMAT(NOW(), '%Y-%m-01') THEN pr.member_id END) as activeMembers,
+            COALESCE(SUM(CASE WHEN pr.points_change > 0 AND pr.record_time >= DATE_FORMAT(NOW(), '%Y-%m-01') THEN pr.points_change ELSE 0 END), 0) as thisMonthEarned,
+            COALESCE(SUM(CASE WHEN pr.points_change &lt; 0 AND pr.record_time >= DATE_FORMAT(NOW(), '%Y-%m-01') THEN ABS(pr.points_change) ELSE 0 END), 0) as thisMonthUsed
+        FROM points_record pr
+        LEFT JOIN member m ON pr.member_id = m.id
+        WHERE (pr.expire_time IS NULL OR pr.expire_time > NOW())
+    </select>
+
+    <!-- 按月统计积分发放/使用 -->
+    <select id="getMonthlyPointsStats" resultType="java.util.Map">
+        SELECT
+            DATE_FORMAT(record_time, '%Y-%m') as month,
+            COALESCE(SUM(CASE WHEN points_change > 0 THEN points_change ELSE 0 END), 0) as earned,
+            COALESCE(SUM(CASE WHEN points_change &lt; 0 THEN ABS(points_change) ELSE 0 END), 0) as used
+        FROM points_record
+        <where>
+            <if test="startTime != null">
+                AND record_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND record_time &lt;= #{endTime}
+            </if>
+        </where>
+        GROUP BY DATE_FORMAT(record_time, '%Y-%m')
+        ORDER BY month ASC
+    </select>
+
+</mapper>

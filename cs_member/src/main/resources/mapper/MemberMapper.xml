@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cloud.hilang.cs_member.mapper.MemberMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="cloud.hilang.cs_member.entity.Member">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="member_no" property="memberNo" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="gender" property="gender" jdbcType="TINYINT"/>
+        <result column="birthday" property="birthday" jdbcType="DATE"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+        <result column="total_consumption" property="totalConsumption" jdbcType="DECIMAL"/>
+        <result column="total_points" property="totalPoints" jdbcType="INTEGER"/>
+        <result column="current_points" property="currentPoints" jdbcType="INTEGER"/>
+        <result column="balance" property="balance" jdbcType="DECIMAL"/>
+        <result column="register_store_id" property="registerStoreId" jdbcType="BIGINT"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="last_consumption_time" property="lastConsumptionTime" jdbcType="TIMESTAMP"/>
+        <result column="login_count" property="loginCount" jdbcType="INTEGER"/>
+        <result column="last_login_time" property="lastLoginTime" jdbcType="TIMESTAMP"/>
+        <result column="last_login_ip" property="lastLoginIp" jdbcType="VARCHAR"/>
+        <result column="created_time" property="createdTime" jdbcType="TIMESTAMP"/>
+        <result column="updated_time" property="updatedTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, member_no, name, phone, password, gender, birthday, email, address,
+        total_consumption, total_points, current_points, balance,
+        register_store_id, status, last_consumption_time, login_count,
+        last_login_time, last_login_ip, created_time, updated_time
+    </sql>
+
+    <!-- 根据手机号查询会员 -->
+    <select id="selectByPhone" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM member
+        WHERE phone = #{phone,jdbcType=VARCHAR}
+          AND status != 0
+    </select>
+
+    <!-- 根据邮箱查询会员 -->
+    <select id="selectByEmail" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM member
+        WHERE email = #{email,jdbcType=VARCHAR}
+          AND status != 0
+    </select>
+
+    <!-- 根据会员编号查询会员 -->
+    <select id="selectByMemberNo" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM member
+        WHERE member_no = #{memberNo,jdbcType=VARCHAR}
+          AND status != 0
+    </select>
+
+    <!-- 根据手机号或会员号查找会员 -->
+    <select id="findByPhoneOrMemberNo" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM member
+        WHERE (phone = #{phoneOrMemberNo,jdbcType=VARCHAR} OR member_no = #{phoneOrMemberNo,jdbcType=VARCHAR})
+          AND status != 0
+    </select>
+
+    <!-- 根据ID查找会员 -->
+    <select id="findById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM member
+        WHERE id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <!-- 根据ID查询会员 -->
+    <select id="selectById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM member
+        WHERE id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <!-- 插入会员 -->
+    <insert id="insert" parameterType="cloud.hilang.cs_member.entity.Member" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO member (
+            member_no, name, phone, password, gender, birthday, email, address,
+            total_consumption, total_points, current_points, balance,
+            register_store_id, status, created_time
+        ) VALUES (
+            #{memberNo,jdbcType=VARCHAR},
+            #{name,jdbcType=VARCHAR},
+            #{phone,jdbcType=VARCHAR},
+            #{password,jdbcType=VARCHAR},
+            #{gender,jdbcType=TINYINT},
+            #{birthday,jdbcType=DATE},
+            #{email,jdbcType=VARCHAR},
+            #{address,jdbcType=VARCHAR},
+            #{totalConsumption,jdbcType=DECIMAL},
+            #{totalPoints,jdbcType=INTEGER},
+            #{currentPoints,jdbcType=INTEGER},
+            #{balance,jdbcType=DECIMAL},
+            #{registerStoreId,jdbcType=BIGINT},
+            #{status,jdbcType=TINYINT},
+            #{createdTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <!-- 更新会员登录信息 -->
+    <update id="updateLoginInfo">
+        UPDATE member
+        SET login_count = login_count + 1,
+            last_login_time = #{loginTime,jdbcType=TIMESTAMP},
+            last_login_ip = #{loginIp,jdbcType=VARCHAR},
+            updated_time = NOW()
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 更新会员状态 -->
+    <update id="updateStatus">
+        UPDATE member
+        SET status = #{status,jdbcType=TINYINT},
+            updated_time = NOW()
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 更新会员积分 -->
+    <update id="updatePoints">
+        UPDATE member
+        SET current_points = #{points,jdbcType=INTEGER},
+            total_points = #{totalPoints,jdbcType=INTEGER},
+            updated_time = NOW()
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 更新会员信息 -->
+    <update id="updateMemberInfo" parameterType="cloud.hilang.cs_member.entity.Member">
+        UPDATE member
+        <set>
+            <if test="name != null">name = #{name,jdbcType=VARCHAR},</if>
+            <if test="gender != null">gender = #{gender,jdbcType=TINYINT},</if>
+            <if test="birthday != null">birthday = #{birthday,jdbcType=DATE},</if>
+            <if test="email != null">email = #{email,jdbcType=VARCHAR},</if>
+            <if test="address != null">address = #{address,jdbcType=VARCHAR},</if>
+            <if test="status != null">status = #{status,jdbcType=TINYINT},</if>
+            updated_time = NOW()
+        </set>
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 查询会员列表 -->
+    <select id="selectMemberList" resultMap="BaseResultMap">
+        SELECT
+            m.id, m.member_no, m.name, m.phone, m.password, m.gender, m.birthday, m.email, m.address,
+            m.total_consumption, m.total_points, m.current_points, m.balance,
+            m.register_store_id, m.status, m.last_consumption_time, m.login_count,
+            m.last_login_time, m.last_login_ip, m.created_time, m.updated_time
+        FROM member m
+        LEFT JOIN store s ON m.register_store_id = s.id
+        <where>
+            <if test="name != null and name != ''">
+                AND m.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="phone != null and phone != ''">
+                AND m.phone LIKE CONCAT('%', #{phone}, '%')
+            </if>
+            <if test="memberNo != null and memberNo != ''">
+                AND m.member_no LIKE CONCAT('%', #{memberNo}, '%')
+            </if>
+            <if test="status != null">
+                AND m.status = #{status}
+            </if>
+            <if test="storeName != null and storeName != ''">
+                AND s.store_name LIKE CONCAT('%', #{storeName}, '%')
+            </if>
+            <if test="gender != null">
+                AND m.gender = #{gender}
+            </if>
+            <if test="startTime != null">
+                AND m.created_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND m.created_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY m.created_time DESC
+    </select>
+
+    <!-- 验证手机号是否存在（包括已删除的记录） -->
+    <select id="selectPhoneExists" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM member
+        WHERE phone = #{phone,jdbcType=VARCHAR}
+        LIMIT 1
+    </select>
+
+    <!-- 验证邮箱是否存在（包括已删除的记录） -->
+    <select id="selectEmailExists" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM member
+        WHERE email = #{email,jdbcType=VARCHAR}
+        LIMIT 1
+    </select>
+
+    <!-- 更新会员卡积分 -->
+    <update id="updateMemberCardPoints">
+        UPDATE member_card
+        SET current_points = #{points,jdbcType=INTEGER},
+            total_points = #{totalPoints,jdbcType=INTEGER},
+            updated_time = #{updateTime,jdbcType=TIMESTAMP}
+        WHERE member_id = #{memberId,jdbcType=BIGINT}
+    </update>
+
+    <!-- 根据状态查询会员数量 -->
+    <select id="countByStatus" parameterType="java.lang.Integer" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM member
+        WHERE status = #{status,jdbcType=TINYINT}
+    </select>
+
+    <!-- 查询指定时间段内注册的会员数量 -->
+    <select id="countByRegisterTime" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM member
+        WHERE created_time &gt;= #{startTime,jdbcType=TIMESTAMP}
+          AND created_time &lt;= #{endTime,jdbcType=TIMESTAMP}
+    </select>
+
+    <!-- 查询即将生日的会员（未来30天内） -->
+    <select id="selectUpcomingBirthdayMembers" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM member
+        WHERE status = 1
+          AND DAYOFYEAR(birthday) BETWEEN DAYOFYEAR(CURDATE()) AND DAYOFYEAR(DATE_ADD(CURDATE(), INTERVAL 30 DAY))
+        ORDER BY DAYOFYEAR(birthday)
+    </select>
+
+    <!-- 查询长期未活跃会员（超过90天未登录） -->
+    <select id="selectInactiveMembers" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM member
+        WHERE status = 1
+          AND (last_login_time IS NULL OR last_login_time &lt; DATE_SUB(NOW(), INTERVAL 90 DAY))
+        ORDER BY last_login_time ASC
+    </select>
+
+    <!-- 根据门店统计会员数量 -->
+    <select id="countByStore" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM member
+        WHERE register_store_id = #{storeId,jdbcType=BIGINT}
+          AND status = 1
+    </select>
+
+    <!-- 根据日期范围和门店统计会员数量 -->
+    <select id="countByDateRange" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM member
+        <where>
+            <if test="storeId != null">
+                AND register_store_id = #{storeId,jdbcType=BIGINT}
+            </if>
+            <if test="startTime != null">
+                AND created_time &gt;= #{startTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND created_time &lt;= #{endTime,jdbcType=TIMESTAMP}
+            </if>
+            AND status = 1
+        </where>
+    </select>
+
+    <!-- 获取会员增长数据 -->
+    <select id="getMemberGrowthData" resultType="java.util.Map">
+        SELECT
+            DATE(created_time) as date,
+            COUNT(*) as newMembers,
+            SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) as activeMembers
+        FROM member
+        <where>
+            <if test="storeId != null">
+                AND register_store_id = #{storeId,jdbcType=BIGINT}
+            </if>
+            <if test="startDate != null">
+                AND created_time &gt;= #{startDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="endDate != null">
+                AND created_time &lt;= #{endDate,jdbcType=TIMESTAMP}
+            </if>
+        </where>
+        GROUP BY DATE(created_time)
+        ORDER BY DATE(created_time) ASC
+    </select>
+
+</mapper>

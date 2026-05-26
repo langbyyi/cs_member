@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cloud.hilang.cs_member.mapper.SystemConfigMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="cloud.hilang.cs_member.entity.SystemConfig">
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="config_key" property="configKey" jdbcType="VARCHAR" />
+        <result column="config_value" property="configValue" jdbcType="LONGVARCHAR" />
+        <result column="config_type" property="configType" jdbcType="VARCHAR" />
+        <result column="config_name" property="configName" jdbcType="VARCHAR" />
+        <result column="description" property="description" jdbcType="VARCHAR" />
+        <result column="data_type" property="dataType" jdbcType="VARCHAR" />
+        <result column="sort_order" property="sortOrder" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, config_key, config_value, config_type, config_name, description, data_type,
+        sort_order, create_time, update_time
+    </sql>
+
+    <!-- 根据配置键获取配置值 -->
+    <select id="selectConfigValueByKey" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT config_value
+        FROM system_config
+        WHERE config_key = #{configKey,jdbcType=VARCHAR}
+        LIMIT 1
+    </select>
+
+    <!-- 根据配置键获取整型配置值 -->
+    <select id="selectIntValueByKey" resultType="java.lang.Integer">
+        SELECT CAST(config_value AS SIGNED)
+        FROM system_config
+        WHERE config_key = #{configKey,jdbcType=VARCHAR}
+        LIMIT 1
+    </select>
+
+</mapper>

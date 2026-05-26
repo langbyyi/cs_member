@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cloud.hilang.cs_member.mapper.MemberCouponMapper">
+
+    <resultMap id="BaseResultMap" type="cloud.hilang.cs_member.entity.MemberCoupon">
+        <id column="id" property="id"/>
+        <result column="member_id" property="memberId"/>
+        <result column="coupon_id" property="couponId"/>
+        <result column="coupon_code" property="couponCode"/>
+        <result column="receive_time" property="receiveTime"/>
+        <result column="use_time" property="useTime"/>
+        <result column="expire_time" property="expireTime"/>
+        <result column="consumption_id" property="consumptionId"/>
+        <result column="created_time" property="createdTime"/>
+    </resultMap>
+
+    <resultMap id="CouponDetailResultMap" type="cloud.hilang.cs_member.entity.MemberCoupon" extends="BaseResultMap">
+        <result column="coupon_name" property="couponName"/>
+        <result column="coupon_type" property="couponType"/>
+        <result column="discount_value" property="discountValue"/>
+        <result column="min_consumption" property="minConsumption"/>
+    </resultMap>
+
+    <select id="selectByMemberId" resultMap="CouponDetailResultMap">
+        SELECT mc.*, c.coupon_name, c.coupon_type, c.discount_value, c.min_consumption
+        FROM member_coupon mc
+        LEFT JOIN coupon c ON mc.coupon_id = c.id
+        WHERE mc.member_id = #{memberId}
+        ORDER BY mc.receive_time DESC
+    </select>
+
+    <select id="selectByMemberIdFiltered" resultMap="CouponDetailResultMap">
+        SELECT mc.*, c.coupon_name, c.coupon_type, c.discount_value, c.min_consumption
+        FROM member_coupon mc
+        LEFT JOIN coupon c ON mc.coupon_id = c.id
+        WHERE mc.member_id = #{memberId}
+        <if test="status != null and status == 0">
+            AND mc.use_time IS NOT NULL
+        </if>
+        <if test="status != null and status == 1">
+            AND mc.use_time IS NULL AND mc.expire_time > NOW()
+        </if>
+        <if test="status != null and status == 2">
+            AND mc.use_time IS NULL AND mc.expire_time &lt;= NOW()
+        </if>
+        <if test="couponType != null">
+            AND c.coupon_type = #{couponType}
+        </if>
+        ORDER BY mc.receive_time DESC
+    </select>
+
+    <select id="selectAvailableByMemberId" resultMap="CouponDetailResultMap">
+        SELECT mc.*, c.coupon_name, c.coupon_type, c.discount_value, c.min_consumption
+        FROM member_coupon mc
+        LEFT JOIN coupon c ON mc.coupon_id = c.id
+        WHERE mc.member_id = #{memberId}
+          AND mc.use_time IS NULL
+          AND mc.expire_time > NOW()
+        ORDER BY mc.expire_time ASC
+    </select>
+
+    <select id="countByMemberId" resultType="int">
+        SELECT COUNT(*) FROM member_coupon WHERE member_id = #{memberId}
+    </select>
+
+    <select id="countAvailableByMemberId" resultType="int">
+        SELECT COUNT(*) FROM member_coupon
+        WHERE member_id = #{memberId}
+          AND use_time IS NULL
+          AND expire_time > NOW()
+    </select>
+
+    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO member_coupon (member_id, coupon_id, coupon_code, expire_time, created_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.memberId}, #{item.couponId}, #{item.couponCode}, #{item.expireTime}, NOW())
+        </foreach>
+    </insert>
+
+</mapper>

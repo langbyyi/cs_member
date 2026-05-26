@@ -1,0 +1,433 @@
+/**
+ * 响应式背景布局系统
+ * 统一管理不同屏幕尺寸下的背景表现
+ * 提供设备适配和性能优化
+ */
+
+/* 基础响应式断点 */
+:root {
+  --breakpoint-xs: 0px;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-2xl: 1400px;
+
+  /* 响应式背景密度控制 */
+  --bg-density-high: 1;
+  --bg-density-medium: 0.7;
+  --bg-density-low: 0.4;
+  --bg-density-minimal: 0.2;
+}
+
+/* 响应式背景容器基类 */
+.responsive-background {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+
+  /* 性能优化：使用硬件加速 */
+  transform: translateZ(0);
+  will-change: transform;
+
+  /* 基础过渡效果 */
+  transition: all 0.3s ease;
+}
+
+/* 超小屏幕 (手机竖屏) */
+@media (max-width: 575px) {
+  .responsive-background {
+    --bg-animation-speed: 2;
+    --bg-element-scale: 0.5;
+    --bg-opacity: var(--bg-density-minimal);
+  }
+
+  /* 简化装饰元素 */
+  .responsive-background .bg-decoration,
+  .responsive-background .bg-shape,
+  .responsive-background .bg-particle {
+    opacity: var(--bg-opacity);
+  }
+
+  /* 移除复杂的动画效果 */
+  .responsive-background .bg-shape {
+    animation: none !important;
+  }
+
+  /* 优化网格密度 */
+  .responsive-background::before {
+    background-size: 20px 20px, 30px 30px !important;
+  }
+
+  /* 减少装饰元素数量 */
+  .responsive-background .bg-shape:not(.essential) {
+    display: none;
+  }
+}
+
+/* 小屏幕 (手机横屏/小平板) */
+@media (min-width: 576px) and (max-width: 767px) {
+  .responsive-background {
+    --bg-animation-speed: 1.5;
+    --bg-element-scale: 0.7;
+    --bg-opacity: var(--bg-density-low);
+  }
+
+  .responsive-background .bg-decoration {
+    opacity: var(--bg-opacity);
+  }
+
+  .responsive-background .bg-shape {
+    animation-duration: calc(var(--base-animation-duration, 20s) / var(--bg-animation-speed));
+  }
+
+  .responsive-background::before {
+    background-size: 30px 30px, 40px 40px !important;
+  }
+}
+
+/* 中等屏幕 (平板) */
+@media (min-width: 768px) and (max-width: 991px) {
+  .responsive-background {
+    --bg-animation-speed: 1.2;
+    --bg-element-scale: 0.85;
+    --bg-opacity: var(--bg-density-medium);
+  }
+
+  .responsive-background .bg-shape {
+    animation-duration: calc(var(--base-animation-duration, 20s) / var(--bg-animation-speed));
+  }
+
+  .responsive-background::before {
+    background-size: 40px 40px, 50px 50px !important;
+  }
+}
+
+/* 大屏幕 (桌面) */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .responsive-background {
+    --bg-animation-speed: 1;
+    --bg-element-scale: 1;
+    --bg-opacity: var(--bg-density-high);
+  }
+}
+
+/* 超大屏幕 (大桌面) */
+@media (min-width: 1200px) {
+  .responsive-background {
+    --bg-animation-speed: 0.8;
+    --bg-element-scale: 1.2;
+    --bg-opacity: var(--bg-density-high);
+  }
+
+  /* 大屏幕增强效果 */
+  .responsive-background .bg-shape {
+    animation-duration: calc(var(--base-animation-duration, 20s) * 0.8);
+  }
+
+  /* 增加更多装饰元素 */
+  .responsive-background .bg-enhanced {
+    display: block;
+  }
+}
+
+/* 设备方向适配 */
+@media (orientation: portrait) {
+  .responsive-background {
+    --bg-orientation-mode: portrait;
+  }
+
+  /* 竖屏优化 */
+  .responsive-background .bg-shape {
+    transform-origin: center center;
+  }
+}
+
+@media (orientation: landscape) {
+  .responsive-background {
+    --bg-orientation-mode: landscape;
+  }
+
+  /* 横屏优化 */
+  .responsive-background .bg-shape {
+    transform-origin: center center;
+  }
+}
+
+/* 高分辨率屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .responsive-background {
+    --bg-resolution: high;
+  }
+
+  /* 高分辨率屏幕使用更精细的纹理 */
+  .responsive-background::before {
+    background-size: 60px 60px, 80px 80px !important;
+  }
+}
+
+/* 低性能设备优化 */
+@media (prefers-reduced-motion: reduce) {
+  .responsive-background {
+    --bg-motion-preference: reduced;
+  }
+
+  /* 禁用所有动画 */
+  .responsive-background *,
+  .responsive-background::before,
+  .responsive-background::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* 简化背景效果 */
+  .responsive-background::before,
+  .responsive-background::after {
+    opacity: 0.3 !important;
+  }
+}
+
+/* 内存受限设备优化 */
+@media (max-device-memory: 4gb) {
+  .responsive-background {
+    --bg-memory-constrained: true;
+  }
+
+  /* 减少同时活动的装饰元素 */
+  .responsive-background .bg-shape:nth-child(n+4),
+  .responsive-background .bg-particle:nth-child(n+6) {
+    display: none;
+  }
+
+  /* 简化视觉效果 */
+  .responsive-background .bg-decoration {
+    backdrop-filter: none;
+  }
+}
+
+/* CPU受限设备优化 */
+@media (max-width: 768px) and (max-height: 1024px) and (orientation: portrait) {
+  .responsive-background {
+    --bg-performance-mode: low;
+  }
+
+  /* 移除复杂的效果 */
+  .responsive-background .bg-shape {
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+}
+
+/* 网络状态适配 */
+@media (prefers-reduced-data: reduce) {
+  .responsive-background {
+    --bg-data-saving: true;
+  }
+
+  /* 简化背景，减少数据使用 */
+  .responsive-background::before,
+  .responsive-background::after {
+    display: none;
+  }
+
+  .responsive-background .bg-decoration {
+    display: none;
+  }
+}
+
+/* 响应式登录框容器 */
+.responsive-login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* 响应式登录框 */
+.responsive-login-box {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+/* 手机端优化 */
+@media (max-width: 575px) {
+  .responsive-login-container {
+    padding: 16px;
+  }
+
+  .responsive-login-box {
+    max-width: 100%;
+    padding: 32px 24px;
+    margin: 20px 0;
+  }
+}
+
+/* 平板端优化 */
+@media (min-width: 576px) and (max-width: 991px) {
+  .responsive-login-container {
+    padding: 24px;
+  }
+
+  .responsive-login-box {
+    padding: 40px 32px;
+  }
+}
+
+/* 桌面端优化 */
+@media (min-width: 992px) {
+  .responsive-login-container {
+    padding: 32px;
+  }
+
+  .responsive-login-box {
+    padding: 48px;
+  }
+}
+
+/* 响应式字体大小 */
+.responsive-text {
+  font-size: clamp(14px, 2.5vw, 16px);
+  line-height: 1.6;
+}
+
+.responsive-title {
+  font-size: clamp(24px, 5vw, 32px);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.responsive-subtitle {
+  font-size: clamp(12px, 2vw, 16px);
+  opacity: 0.8;
+  margin-bottom: 32px;
+}
+
+/* 响应式间距 */
+.responsive-spacing {
+  margin: clamp(16px, 4vw, 32px) 0;
+}
+
+/* 响应式按钮 */
+.responsive-button {
+  width: 100%;
+  height: clamp(44px, 8vw, 56px);
+  font-size: clamp(14px, 2.5vw, 16px);
+  padding: 0 clamp(16px, 4vw, 24px);
+  border-radius: clamp(8px, 2vw, 12px);
+  transition: all 0.3s ease;
+}
+
+/* 响应式输入框 */
+.responsive-input {
+  height: clamp(44px, 8vw, 56px);
+  font-size: clamp(14px, 2.5vw, 16px);
+  border-radius: clamp(8px, 2vw, 12px);
+  padding: 0 clamp(12px, 3vw, 20px);
+}
+
+/* 响应式装饰元素控制 */
+.responsive-decoration {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 装饰元素可见性控制 */
+.visible-xs { display: block; }
+.visible-sm { display: none; }
+.visible-md { display: none; }
+.visible-lg { display: none; }
+.visible-xl { display: none; }
+
+@media (min-width: 576px) {
+  .visible-xs { display: none; }
+  .visible-sm { display: block; }
+}
+
+@media (min-width: 768px) {
+  .visible-sm { display: none; }
+  .visible-md { display: block; }
+}
+
+@media (min-width: 992px) {
+  .visible-md { display: none; }
+  .visible-lg { display: block; }
+}
+
+@media (min-width: 1200px) {
+  .visible-lg { display: none; }
+  .visible-xl { display: block; }
+}
+
+/* 隐藏装饰元素控制 */
+.hidden-xs { display: none; }
+.hidden-sm { display: block; }
+.hidden-md { display: block; }
+.hidden-lg { display: block; }
+.hidden-xl { display: block; }
+
+@media (min-width: 576px) {
+  .hidden-xs { display: block; }
+  .hidden-sm { display: none; }
+}
+
+@media (min-width: 768px) {
+  .hidden-sm { display: block; }
+  .hidden-md { display: none; }
+}
+
+@media (min-width: 992px) {
+  .hidden-md { display: block; }
+  .hidden-lg { display: none; }
+}
+
+@media (min-width: 1200px) {
+  .hidden-lg { display: block; }
+  .hidden-xl { display: none; }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .responsive-background {
+    --bg-interaction-mode: touch;
+  }
+
+  /* 触摸设备优化点击区域 */
+  .responsive-button,
+  .responsive-input {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* 移除悬停效果 */
+  .responsive-login-box:hover {
+    transform: none;
+  }
+
+  .responsive-button:hover {
+    transform: none;
+  }
+}
+
+/* 精确指针设备优化 (鼠标) */
+@media (hover: hover) and (pointer: fine) {
+  .responsive-background {
+    --bg-interaction-mode: mouse;
+  }
+
+  /* 保留悬停效果 */
+  .responsive-login-box:hover {
+    transform: translateY(-4px);
+  }
+
+  .responsive-button:hover {
+    transform: translateY(-2px);
+  }
+}

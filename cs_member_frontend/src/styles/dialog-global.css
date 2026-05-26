@@ -1,0 +1,31 @@
+/* 忘记密码对话框全局样式 */
+.el-overlay {
+  background: var(--bg-image) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  position: relative !important;
+}
+
+/* 在覆盖层上添加渐变遮罩 */
+.el-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-gradient);
+  z-index: 0;
+}
+
+/* 确保对话框在遮罩之上 */
+.el-overlay .el-dialog {
+  z-index: 1001 !important;
+  position: relative !important;
+}
+
+/* 确保对话框内容在正确层级 */
+.el-overlay .el-dialog__wrapper {
+  z-index: 1001 !important;
+}

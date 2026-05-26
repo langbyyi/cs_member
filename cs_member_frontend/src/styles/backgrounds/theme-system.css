@@ -1,0 +1,519 @@
+/**
+ * 深色/浅色主题系统
+ * 支持系统主题检测、手动切换和平滑过渡
+ */
+
+/* 主题变量定义 */
+:root {
+  /* ===== 浅色主题变量 ===== */
+  --light-bg-primary: #ffffff;
+  --light-bg-secondary: #f8fafc;
+  --light-bg-accent: #f1f5f9;
+  --light-text-primary: #1e293b;
+  --light-text-secondary: #64748b;
+  --light-text-muted: #94a3b8;
+  --light-border-primary: #e2e8f0;
+  --light-border-secondary: #cbd5e1;
+  --light-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --light-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --light-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  /* 品牌色 - 浅色主题 */
+  --light-primary-50: #eff6ff;
+  --light-primary-100: #dbeafe;
+  --light-primary-500: #3b82f6;
+  --light-primary-600: #2563eb;
+  --light-primary-700: #1d4ed8;
+
+  /* ===== 深色主题变量 ===== */
+  --dark-bg-primary: #0f172a;
+  --dark-bg-secondary: #1e293b;
+  --dark-bg-accent: #334155;
+  --dark-text-primary: #f1f5f9;
+  --dark-text-secondary: #cbd5e1;
+  --dark-text-muted: #94a3b8;
+  --dark-border-primary: #334155;
+  --dark-border-secondary: #475569;
+  --dark-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --dark-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --dark-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+
+  /* 品牌色 - 深色主题 */
+  --dark-primary-50: #1e3a8a;
+  --dark-primary-100: #1e40af;
+  --dark-primary-500: #3b82f6;
+  --dark-primary-600: #60a5fa;
+  --dark-primary-700: #93bbfc;
+
+  /* ===== 当前活跃主题变量 ===== */
+  --bg-primary: var(--light-bg-primary);
+  --bg-secondary: var(--light-bg-secondary);
+  --bg-accent: var(--light-bg-accent);
+  --text-primary: var(--light-text-primary);
+  --text-secondary: var(--light-text-secondary);
+  --text-muted: var(--light-text-muted);
+  --border-primary: var(--light-border-primary);
+  --border-secondary: var(--light-border-secondary);
+  --shadow-sm: var(--light-shadow-sm);
+  --shadow-md: var(--light-shadow-md);
+  --shadow-lg: var(--light-shadow-lg);
+}
+
+/* 深色主题类 */
+.dark-theme {
+  --bg-primary: var(--dark-bg-primary);
+  --bg-secondary: var(--dark-bg-secondary);
+  --bg-accent: var(--dark-bg-accent);
+  --text-primary: var(--dark-text-primary);
+  --text-secondary: var(--dark-text-secondary);
+  --text-muted: var(--dark-text-muted);
+  --border-primary: var(--dark-border-primary);
+  --border-secondary: var(--dark-border-secondary);
+  --shadow-sm: var(--dark-shadow-sm);
+  --shadow-md: var(--dark-shadow-md);
+  --shadow-lg: var(--dark-shadow-lg);
+}
+
+/* 自动主题检测 */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light-theme) {
+    --bg-primary: var(--dark-bg-primary);
+    --bg-secondary: var(--dark-bg-secondary);
+    --bg-accent: var(--dark-bg-accent);
+    --text-primary: var(--dark-text-primary);
+    --text-secondary: var(--dark-text-secondary);
+    --text-muted: var(--dark-text-muted);
+    --border-primary: var(--dark-border-primary);
+    --border-secondary: var(--dark-border-secondary);
+    --shadow-sm: var(--dark-shadow-sm);
+    --shadow-md: var(--dark-shadow-md);
+    --shadow-lg: var(--dark-shadow-lg);
+  }
+}
+
+/* 强制浅色主题 */
+.light-theme {
+  --bg-primary: var(--light-bg-primary);
+  --bg-secondary: var(--light-bg-secondary);
+  --bg-accent: var(--light-bg-accent);
+  --text-primary: var(--light-text-primary);
+  --text-secondary: var(--light-text-secondary);
+  --text-muted: var(--light-text-muted);
+  --border-primary: var(--light-border-primary);
+  --border-secondary: var(--light-border-secondary);
+  --shadow-sm: var(--light-shadow-sm);
+  --shadow-md: var(--light-shadow-md);
+  --shadow-lg: var(--light-shadow-lg);
+}
+
+/* 全局主题过渡效果 */
+:root {
+  --theme-transition-duration: 0.8s;
+  --theme-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+  transition:
+    background-color var(--theme-transition-duration) var(--theme-transition-easing) !important,
+    border-color var(--theme-transition-duration) var(--theme-transition-easing) !important,
+    color var(--theme-transition-duration) var(--theme-transition-easing) !important,
+    box-shadow var(--theme-transition-duration) var(--theme-transition-easing) !important,
+    opacity var(--theme-transition-duration) var(--theme-transition-easing) !important;
+}
+
+/* 防止某些元素过渡 */
+.theme-transitioning img,
+.theme-transitioning video,
+.theme-transitioning iframe,
+.theme-transitioning [data-no-transition] {
+  transition: none !important;
+}
+
+/* 背景主题适配 */
+.theme-background {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 浅色主题背景 */
+.theme-background:not(.dark-theme) {
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+}
+
+/* 深色主题背景 */
+.theme-background.dark-theme {
+  background: linear-gradient(135deg, var(--dark-bg-primary) 0%, var(--dark-bg-secondary) 100%);
+}
+
+/* 登录框主题适配 */
+.theme-login-box {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-lg);
+  color: var(--text-primary);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 浅色主题登录框特殊效果 */
+.theme-login-box:not(.dark-theme) {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(59, 130, 246, 0.1) inset;
+}
+
+/* 深色主题登录框特殊效果 */
+.theme-login-box.dark-theme {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(59, 130, 246, 0.2) inset;
+}
+
+/* 装饰元素主题适配 */
+.theme-decoration {
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.theme-decoration.light {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.theme-decoration.dark {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+/* 文本颜色主题适配 */
+.theme-text-primary {
+  color: var(--text-primary);
+}
+
+.theme-text-secondary {
+  color: var(--text-secondary);
+}
+
+.theme-text-muted {
+  color: var(--text-muted);
+}
+
+/* 按钮主题适配 */
+.theme-button {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  transition: all 0.3s ease;
+}
+
+.theme-button:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-secondary);
+}
+
+/* 主色调按钮 */
+.theme-button-primary {
+  background: var(--light-primary-500);
+  color: white;
+  border: 1px solid var(--light-primary-500);
+}
+
+.dark-theme .theme-button-primary {
+  background: var(--dark-primary-600);
+  border-color: var(--dark-primary-600);
+}
+
+.theme-button-primary:hover {
+  background: var(--light-primary-600);
+  border-color: var(--light-primary-600);
+}
+
+.dark-theme .theme-button-primary:hover {
+  background: var(--dark-primary-700);
+  border-color: var(--dark-primary-700);
+}
+
+/* 输入框主题适配 */
+.theme-input {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  transition: all 0.3s ease;
+}
+
+.theme-input:focus {
+  border-color: var(--light-primary-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dark-theme .theme-input:focus {
+  border-color: var(--dark-primary-600);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* 主题切换按钮 */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+}
+
+.theme-toggle:hover {
+  background: var(--bg-secondary);
+  transform: scale(1.1);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+/* 主题切换动画 */
+.theme-switching {
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-switching::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: themeSwitchSweep 0.6s ease;
+}
+
+.dark-theme .theme-switching::before {
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.2), transparent);
+}
+
+@keyframes themeSwitchSweep {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* 渐变背景主题适配 */
+.theme-gradient-bg {
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  position: relative;
+}
+
+.theme-gradient-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+  opacity: 0.6;
+}
+
+.dark-theme .theme-gradient-bg::before {
+  background: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+  opacity: 0.8;
+}
+
+/* 卡片主题适配 */
+.theme-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-sm);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.theme-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* 模态框主题适配 */
+.theme-modal {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-lg);
+  border-radius: 16px;
+  color: var(--text-primary);
+}
+
+/* 提示框主题适配 */
+.theme-tooltip {
+  background: var(--bg-accent);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-md);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+/* 分割线主题适配 */
+.theme-divider {
+  height: 1px;
+  background: var(--border-primary);
+  margin: 16px 0;
+}
+
+/* 徽章主题适配 */
+.theme-badge {
+  background: var(--bg-accent);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* 链接主题适配 */
+.theme-link {
+  color: var(--light-primary-500);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.dark-theme .theme-link {
+  color: var(--dark-primary-500);
+}
+
+.theme-link:hover {
+  color: var(--light-primary-600);
+}
+
+.dark-theme .theme-link:hover {
+  color: var(--dark-primary-600);
+}
+
+/* 图标主题适配 */
+.theme-icon {
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.theme-icon:hover {
+  color: var(--text-primary);
+}
+
+/* 滚动条主题适配 */
+.theme-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.theme-scrollbar::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.theme-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 4px;
+}
+
+.theme-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* 加载状态主题适配 */
+.theme-loading {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+}
+
+/* 错误状态主题适配 */
+.theme-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.dark-theme .theme-error {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* 成功状态主题适配 */
+.theme-success {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.dark-theme .theme-success {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+/* 警告状态主题适配 */
+.theme-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.dark-theme .theme-warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+/* 响应式主题切换按钮 */
+@media (max-width: 768px) {
+  .theme-toggle {
+    width: 40px;
+    height: 40px;
+    top: 16px;
+    right: 16px;
+  }
+}
+
+/* 高对比度主题适配 */
+@media (prefers-contrast: high) {
+  .theme-login-box {
+    border-width: 2px;
+  }
+
+  .theme-button {
+    border-width: 2px;
+  }
+
+  .theme-input {
+    border-width: 2px;
+  }
+}
+
+/* 减少动画主题适配 */
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle:hover {
+    transform: none;
+  }
+
+  .theme-switching::before {
+    animation: none;
+  }
+}

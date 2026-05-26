@@ -1,0 +1,674 @@
+/*
+ * 增强动画效果样式
+ * 为忘记密码页面提供高级动画效果和微交互体验
+ * 包含3D转换、波纹效果、粒子动画等高级特效
+ */
+
+/* ===== 基础CSS变量定义 ===== */
+:root {
+  /* 动画缓动函数 */
+  --ease-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-elastic: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-back: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-swift: cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* 动画持续时间 */
+  --duration-instant: 0.15s;
+  --duration-fast: 0.25s;
+  --duration-normal: 0.35s;
+  --duration-slow: 0.55s;
+  --duration-epic: 0.85s;
+
+  /* 主题色彩 */
+  --primary-color: #667eea;
+  --primary-dark: #5a67d8;
+  --secondary-color: #764ba2;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+  --info-color: #3b82f6;
+
+  /* 阴影层级 */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+  --shadow-2xl: 0 32px 64px rgba(0, 0, 0, 0.20);
+  --shadow-glow: 0 0 20px rgba(102, 126, 234, 0.4);
+}
+
+/* ===== 3D页面转换动画 ===== */
+.dialog-3d-container {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  overflow: hidden;
+}
+
+.dialog-3d-wrapper {
+  transform-style: preserve-3d;
+  transition: transform var(--duration-slow) var(--ease-back);
+  animation: dialogEntrance3D var(--duration-epic) var(--ease-back);
+}
+
+.dialog-3d-wrapper.closing {
+  animation: dialogExit3D var(--duration-slow) var(--ease-swift) forwards;
+}
+
+@keyframes dialogEntrance3D {
+  0% {
+    opacity: 0;
+    transform:
+      rotateX(-15deg)
+      rotateY(-25deg)
+      translateZ(-100px)
+      scale(0.8);
+  }
+  40% {
+    opacity: 0.6;
+    transform:
+      rotateX(2deg)
+      rotateY(3deg)
+      translateZ(50px)
+      scale(1.02);
+  }
+  70% {
+    opacity: 0.9;
+    transform:
+      rotateX(-1deg)
+      rotateY(1deg)
+      translateZ(20px)
+      scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform:
+      rotateX(0deg)
+      rotateY(0deg)
+      translateZ(0px)
+      scale(1);
+  }
+}
+
+@keyframes dialogExit3D {
+  0% {
+    opacity: 1;
+    transform:
+      rotateX(0deg)
+      rotateY(0deg)
+      translateZ(0px)
+      scale(1);
+  }
+  60% {
+    opacity: 0.3;
+    transform:
+      rotateX(8deg)
+      rotateY(12deg)
+      translateZ(-80px)
+      scale(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform:
+      rotateX(15deg)
+      rotateY(25deg)
+      translateZ(-150px)
+      scale(0.6);
+  }
+}
+
+/* ===== 步骤切换滑动过渡动画 ===== */
+.step-transition-container {
+  position: relative;
+  min-height: 400px;
+  overflow: hidden;
+}
+
+.step-content-3d {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  opacity: 1;
+  transform: translateX(0) translateZ(0);
+  transition:
+    transform var(--duration-slow) var(--ease-back),
+    opacity var(--duration-normal) var(--ease-smooth);
+  will-change: transform, opacity;
+}
+
+.step-content-3d.sliding-out-left {
+  opacity: 0.3;
+  transform:
+    translateX(-30%)
+    translateZ(-50px)
+    rotateY(-15deg)
+    scale(0.95);
+}
+
+.step-content-3d.sliding-out-right {
+  opacity: 0.3;
+  transform:
+    translateX(30%)
+    translateZ(-50px)
+    rotateY(15deg)
+    scale(0.95);
+}
+
+.step-content-3d.sliding-in-left {
+  opacity: 1;
+  transform:
+    translateX(0)
+    translateZ(0)
+    rotateY(0deg)
+    scale(1);
+}
+
+.step-content-3d.sliding-in-right {
+  opacity: 1;
+  transform:
+    translateX(0)
+    translateZ(0)
+    rotateY(0deg)
+    scale(1);
+}
+
+/* ===== 按钮波纹扩散效果 ===== */
+.ripple-button {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ripple-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition:
+    width var(--duration-slow) var(--ease-smooth),
+    height var(--duration-slow) var(--ease-smooth);
+  z-index: -1;
+}
+
+.ripple-button:active::before {
+  width: 300px;
+  height: 300px;
+  transition: width var(--duration-fast) var(--ease-back),
+              height var(--duration-fast) var(--ease-back);
+}
+
+/* 双层波纹效果 */
+.ripple-button-enhanced {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-button-enhanced::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  transform: translate(-50%, -50%);
+  transition:
+    width var(--duration-slow) var(--ease-back),
+    height var(--duration-slow) var(--ease-back),
+    opacity var(--duration-normal) var(--ease-smooth);
+  opacity: 0;
+  z-index: 1;
+}
+
+.ripple-button-enhanced:active::after {
+  width: 200px;
+  height: 200px;
+  opacity: 1;
+  transition:
+    width var(--duration-slow) var(--ease-back),
+    height var(--duration-slow) var(--ease-back),
+    opacity var(--duration-fast) var(--ease-smooth);
+}
+
+/* ===== 输入框内容输入动画 ===== */
+.enhanced-input-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.enhanced-input-wrapper::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  transition: width var(--duration-normal) var(--ease-smooth);
+  border-radius: 2px;
+}
+
+.enhanced-input-wrapper.has-content::before {
+  width: 100%;
+}
+
+/* 输入时的字符动画效果 */
+.enhanced-input {
+  position: relative;
+}
+
+.enhanced-input::placeholder {
+  transition: all var(--duration-normal) var(--ease-smooth);
+}
+
+.enhanced-input:focus::placeholder {
+  opacity: 0.6;
+  transform: translateY(-2px);
+  color: var(--primary-color);
+}
+
+/* 输入框聚焦时的3D效果 */
+.enhanced-input-wrapper.is-focused {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 24px rgba(102, 126, 234, 0.15),
+    0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+/* ===== 成功/失败状态动画反馈 ===== */
+@keyframes successPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    transform: scale(1);
+  }
+  25% {
+    box-shadow: 0 0 0 12px rgba(16, 185, 129, 0.2);
+    transform: scale(1.05);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(16, 185, 129, 0);
+    transform: scale(1.02);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    transform: scale(1);
+  }
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  10% { transform: translateX(-8px) rotate(-1deg); }
+  20% { transform: translateX(8px) rotate(1deg); }
+  30% { transform: translateX(-6px) rotate(-0.5deg); }
+  40% { transform: translateX(6px) rotate(0.5deg); }
+  50% { transform: translateX(-4px) rotate(-0.3deg); }
+  60% { transform: translateX(4px) rotate(0.3deg); }
+  70% { transform: translateX(-2px) rotate(-0.1deg); }
+  80% { transform: translateX(2px) rotate(0.1deg); }
+  90% { transform: translateX(-1px) rotate(0deg); }
+}
+
+@keyframes warningBounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+.status-success {
+  animation: successPulse var(--duration-slow) var(--ease-bounce);
+}
+
+.status-error {
+  animation: errorShake var(--duration-normal) var(--ease-back);
+}
+
+.status-warning {
+  animation: warningBounce var(--duration-normal) var(--ease-bounce);
+}
+
+/* ===== 鼠标悬停细腻效果 ===== */
+.hover-enhanced {
+  position: relative;
+  transition: all var(--duration-normal) var(--ease-smooth);
+}
+
+.hover-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-smooth);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.hover-enhanced:hover::before {
+  opacity: 1;
+}
+
+.hover-enhanced:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--shadow-xl);
+}
+
+/* ===== 点击触觉反馈动画 ===== */
+.haptic-feedback {
+  position: relative;
+  transition: transform var(--duration-instant) var(--ease-smooth);
+}
+
+.haptic-feedback:active {
+  transform: translateY(2px) scale(0.98);
+}
+
+/* 触觉反馈增强效果 */
+.haptic-feedback-enhanced::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+  transform: translate(-50%, -50%);
+  transition: width var(--duration-fast) var(--ease-back),
+              height var(--duration-fast) var(--ease-back);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.haptic-feedback-enhanced:active::after {
+  width: 150px;
+  height: 150px;
+}
+
+/* ===== 加载状态生动动画 ===== */
+.loading-enhanced {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%);
+  animation: loadingShimmer var(--duration-slow) var(--ease-smooth) infinite;
+}
+
+@keyframes loadingShimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* 脉冲加载动画 */
+.loading-pulse {
+  animation: loadingPulse 1.5s var(--ease-smooth) infinite;
+}
+
+@keyframes loadingPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.98); }
+}
+
+/* 弹跳加载动画 */
+.loading-bounce {
+  animation: loadingBounce 1s var(--ease-bounce) infinite;
+}
+
+@keyframes loadingBounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(-3px) scale(1.05); }
+  75% { transform: translateY(1px) scale(0.95); }
+}
+
+/* ===== 表单验证实时反馈动画 ===== */
+.validate-fade-in {
+  animation: validateFadeIn var(--duration-normal) var(--ease-smooth);
+}
+
+@keyframes validateFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.validate-slide-in {
+  animation: validateSlideIn var(--duration-normal) var(--ease-back);
+}
+
+@keyframes validateSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 错误信息抖动动画 */
+.error-message-shake {
+  animation: errorShake var(--duration-normal) var(--ease-back);
+}
+
+/* ===== 页面元素错位进入动画 ===== */
+@keyframes staggeredEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) rotateX(-15deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+  }
+}
+
+.staggered-item {
+  opacity: 0;
+  animation: staggeredEntrance var(--duration-normal) var(--ease-back) forwards;
+  animation-fill-mode: both;
+}
+
+.staggered-item:nth-child(1) { animation-delay: 0.1s; }
+.staggered-item:nth-child(2) { animation-delay: 0.15s; }
+.staggered-item:nth-child(3) { animation-delay: 0.2s; }
+.staggered-item:nth-child(4) { animation-delay: 0.25s; }
+.staggered-item:nth-child(5) { animation-delay: 0.3s; }
+.staggered-item:nth-child(6) { animation-delay: 0.35s; }
+
+/* ===== 高级特效组合 ===== */
+.glow-effect {
+  position: relative;
+}
+
+.glow-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center,
+    rgba(102, 126, 234, 0.2) 0%,
+    transparent 70%);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-smooth);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.glow-effect:hover::after {
+  opacity: 1;
+  animation: glowPulse 2s var(--ease-smooth) infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* 磁性吸引效果 */
+.magnetic-hover {
+  transition: all var(--duration-normal) var(--ease-back);
+}
+
+.magnetic-hover:hover {
+  transform: scale(1.05) rotate(2deg);
+}
+
+/* 液体填充效果 */
+.liquid-fill {
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-fill::before {
+  content: '';
+  position: absolute;
+  bottom: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%);
+  transition: bottom var(--duration-slow) var(--ease-back);
+  opacity: 0.8;
+}
+
+.liquid-fill:hover::before {
+  bottom: 0;
+}
+
+/* ===== 粒子效果背景 ===== */
+.particle-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particleFloat 10s infinite ease-in-out;
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) translateX(50px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* ===== 性能优化 ===== */
+/* 使用 will-change 提示浏览器优化渲染性能 */
+.optimized-animation {
+  will-change: transform, opacity;
+}
+
+/* 对不透明元素使用 transform 代替 top/left */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* 减少重绘和回流 */
+.layout-stable {
+  contain: layout style paint;
+}
+
+/* ===== 响应式动画优化 ===== */
+@media (max-width: 768px) {
+  :root {
+    --duration-slow: 0.35s;
+    --duration-epic: 0.55s;
+  }
+
+  /* 在移动设备上减少动画复杂度 */
+  .dialog-3d-wrapper {
+    animation-duration: 0.5s;
+  }
+
+  .particle-background {
+    display: none; /* 在移动设备上禁用粒子效果 */
+  }
+}
+
+/* ===== 无障碍访问支持 ===== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== 暗色模式适配 ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary-color: #818cf8;
+    --secondary-color: #a78bfa;
+  }
+
+  .enhanced-input-wrapper.is-focused {
+    box-shadow:
+      0 8px 24px rgba(129, 140, 248, 0.25),
+      0 0 0 4px rgba(129, 140, 248, 0.15);
+  }
+}
+
+/* ===== 打印模式优化 ===== */
+@media print {
+  .particle-background,
+  .loading-enhanced::before,
+  .ripple-button::before,
+  .ripple-button-enhanced::after {
+    display: none !important;
+  }
+}

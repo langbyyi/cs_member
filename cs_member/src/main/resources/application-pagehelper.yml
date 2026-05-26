@@ -1,0 +1,47 @@
+# PageHelper分页插件配置
+pagehelper:
+  # 分页插件方言，支持多种数据库
+  helper-dialect: mysql
+
+  # 是否自动分页，默认为false
+  auto-runtime-dialect: true
+
+  # 分页合理化参数，默认为false
+  # 启用后，如果pageNum<1会查询第一页，如果pageNum>pages会查询最后一页
+  reasonable: true
+
+  # 是否支持接口参数来传递分页参数，默认false
+  support-methods-arguments: true
+
+  # 默认页码
+  default-page-size: 10
+
+  # 最大单页分页条数限制
+  page-size-zero: false
+
+  # 当页码为0时，查询所有记录，默认为false
+  page-size-zero-enabled: false
+
+  # params: 为了支持startPage(Object params)方法，增加了该参数来配置参数映射
+  # 用于从对象中根据属性名取值，可以配置pageNum,pageSize,count,pageSizeZero,reasonable
+  # 不配置映射的用默认值，默认值为pageNum=pageNum;pageSize=pageSize;count=countSql;reasonable=reasonable;pageSizeZero=pageSizeZero
+
+  # 自动计算总记录数
+  auto-dialect: true
+
+  # 当使用运行时分页方言时，自动从数据库连接中获取方言
+  auto-runtime-dialect: true
+
+  # 关闭超出页码范围查询，默认为false
+  close-conn: true
+
+  # 分页参数设置
+  params: count=countSql;pageNum=pageNum;pageSize=pageSize;reasonable=reasonable;pageSizeZero=pageSizeZero
+
+# 日志配置（可选，用于查看PageHelper生成的SQL）
+logging:
+  level:
+    # 开启PageHelper的SQL日志
+    com.github.pagehelper: DEBUG
+    # 开启Mapper的SQL日志
+    cloud.hilang.cs_member.mapper: DEBUG

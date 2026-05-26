@@ -1,0 +1,36 @@
+# Java
+*.class
+*.jar
+*.war
+*.log
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+
+# Sensitive config
+cs_member/src/main/resources/application.yml
+
+# Node
+node_modules/
+dist/
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+nul
+
+# Misc
+*.bak
+*.tmp
+*.swp
+logs/

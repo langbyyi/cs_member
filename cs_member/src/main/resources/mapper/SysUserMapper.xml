@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cloud.hilang.cs_member.mapper.SysUserMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="cloud.hilang.cs_member.entity.SysUser">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="avatar" property="avatar" jdbcType="VARCHAR"/>
+        <result column="gender" property="gender" jdbcType="TINYINT"/>
+        <result column="birthday" property="birthday" jdbcType="DATE"/>
+        <result column="store_id" property="storeId" jdbcType="BIGINT"/>
+        <result column="employee_no" property="employeeNo" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="login_count" property="loginCount" jdbcType="INTEGER"/>
+        <result column="last_login_time" property="lastLoginTime" jdbcType="TIMESTAMP"/>
+        <result column="last_login_ip" property="lastLoginIp" jdbcType="VARCHAR"/>
+        <result column="password_error_count" property="passwordErrorCount" jdbcType="INTEGER"/>
+        <result column="password_error_time" property="passwordErrorTime" jdbcType="TIMESTAMP"/>
+        <result column="password_update_time" property="passwordUpdateTime" jdbcType="TIMESTAMP"/>
+        <result column="is_first_login" property="isFirstLogin" jdbcType="TINYINT"/>
+        <result column="created_time" property="createdTime" jdbcType="TIMESTAMP"/>
+        <result column="updated_time" property="updatedTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 用户及其角色结果映射 -->
+    <resultMap id="UserWithRolesResultMap" type="cloud.hilang.cs_member.entity.SysUser" extends="BaseResultMap">
+        <collection property="roles" javaType="java.util.List" ofType="cloud.hilang.cs_member.entity.SysRole">
+            <id column="role_id" property="id" jdbcType="BIGINT"/>
+            <result column="role_code" property="roleCode" jdbcType="VARCHAR"/>
+            <result column="role_name" property="roleName" jdbcType="VARCHAR"/>
+            <result column="role_type" property="roleType" jdbcType="INTEGER"/>
+        </collection>
+    </resultMap>
+
+    <!-- 员工及其角色结果映射 -->
+    <resultMap id="EmployeeResultMap" type="cloud.hilang.cs_member.entity.SysUser" extends="BaseResultMap">
+        <result column="role_code" property="roleCode" jdbcType="VARCHAR"/>
+        <result column="role_name" property="roleName" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, phone, password, name, email, avatar, gender, birthday, store_id,
+        employee_no, status, login_count, last_login_time, last_login_ip,
+        password_error_count, password_error_time, password_update_time,
+        is_first_login, created_time, updated_time
+    </sql>
+
+    <!-- 根据手机号查询用户 -->
+    <select id="selectByPhone" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM sys_user
+        WHERE phone = #{phone,jdbcType=VARCHAR}
+          AND status = 1
+    </select>
+
+    <!-- 根据手机号查找用户（包括已删除的记录） -->
+    <select id="findByPhone" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM sys_user
+        WHERE phone = #{phone,jdbcType=VARCHAR}
+        LIMIT 1
+    </select>
+
+    <!-- 根据邮箱查询用户 -->
+    <select id="selectByEmail" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM sys_user
+        WHERE email = #{email,jdbcType=VARCHAR}
+          AND status = 1
+    </select>
+
+    <!-- 根据ID查询用户 -->
+    <select id="selectById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM sys_user
+        WHERE id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <!-- 根据ID查询用户及其角色权限 -->
+    <select id="selectWithRolesById" parameterType="java.lang.Long" resultMap="UserWithRolesResultMap">
+        SELECT
+            u.id, u.phone, u.password, u.name, u.email, u.avatar, u.gender, u.birthday, u.store_id,
+            u.employee_no, u.status, u.login_count, u.last_login_time, u.last_login_ip,
+            u.password_error_count, u.password_error_time, u.password_update_time,
+            u.is_first_login, u.created_time, u.updated_time,
+            r.id as role_id, r.role_code, r.role_name, r.role_type
+        FROM sys_user u
+        LEFT JOIN sys_user_role ur ON u.id = ur.user_id
+        LEFT JOIN sys_role r ON ur.role_id = r.id
+        WHERE u.id = #{id,jdbcType=BIGINT}
+          AND u.status = 1
+    </select>
+
+    <!-- 插入用户 -->
+    <insert id="insert" parameterType="cloud.hilang.cs_member.entity.SysUser" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user (
+            phone, password, name, email, avatar, gender, birthday, store_id,
+            employee_no, status, is_first_login, created_time
+        ) VALUES (
+            #{phone,jdbcType=VARCHAR},
+            #{password,jdbcType=VARCHAR},
+            #{name,jdbcType=VARCHAR},
+            #{email,jdbcType=VARCHAR},
+            #{avatar,jdbcType=VARCHAR},
+            #{gender,jdbcType=TINYINT},
+            #{birthday,jdbcType=DATE},
+            #{storeId,jdbcType=BIGINT},
+            #{employeeNo,jdbcType=VARCHAR},
+            #{status,jdbcType=TINYINT},
+            #{isFirstLogin,jdbcType=TINYINT},
+            #{createdTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <!-- 更新用户登录信息 -->
+    <update id="updateLoginInfo">
+        UPDATE sys_user
+        SET login_count = login_count + 1,
+            last_login_time = #{loginTime,jdbcType=TIMESTAMP},
+            last_login_ip = #{loginIp,jdbcType=VARCHAR},
+            password_error_count = 0,
+            password_error_time = NULL,
+            updated_time = NOW()
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 增加密码错误次数 -->
+    <update id="increasePasswordErrorCount" parameterType="java.lang.Long">
+        UPDATE sys_user
+        SET password_error_count = password_error_count + 1,
+            password_error_time = NOW(),
+            updated_time = NOW()
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 重置密码错误次数 -->
+    <update id="resetPasswordErrorCount" parameterType="java.lang.Long">
+        UPDATE sys_user
+        SET password_error_count = 0,
+            password_error_time = NULL,
+            updated_time = NOW()
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 锁定用户账号 -->
+    <update id="lockUser" parameterType="java.lang.Long">
+        UPDATE sys_user
+        SET status = 2,
+            updated_time = NOW()
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 解锁用户账号 -->
+    <update id="unlockUser" parameterType="java.lang.Long">
+        UPDATE sys_user
+        SET status = 1,
+            password_error_count = 0,
+            password_error_time = NULL,
+            updated_time = NOW()
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 更新用户信息 -->
+    <update id="updateUserInfo" parameterType="cloud.hilang.cs_member.entity.SysUser">
+        UPDATE sys_user
+        <set>
+            <if test="phone != null">phone = #{phone,jdbcType=VARCHAR},</if>
+            <if test="name != null">name = #{name,jdbcType=VARCHAR},</if>
+            <if test="email != null">email = #{email,jdbcType=VARCHAR},</if>
+            <if test="avatar != null">avatar = #{avatar,jdbcType=VARCHAR},</if>
+            <if test="gender != null">gender = #{gender,jdbcType=TINYINT},</if>
+            <if test="birthday != null">birthday = #{birthday,jdbcType=DATE},</if>
+            <if test="storeId != null">store_id = #{storeId,jdbcType=BIGINT},</if>
+            <if test="employeeNo != null">employee_no = #{employeeNo,jdbcType=VARCHAR},</if>
+            <if test="status != null">status = #{status,jdbcType=TINYINT},</if>
+            <if test="password != null">password = #{password,jdbcType=VARCHAR},</if>
+            updated_time = NOW()
+        </set>
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 根据用户ID查询用户权限 -->
+    <select id="selectUserPermissions" parameterType="java.lang.Long" resultType="java.lang.String">
+        SELECT DISTINCT sp.permission_code
+        FROM sys_user_role sur
+        INNER JOIN sys_role_permission srp ON sur.role_id = srp.role_id
+        INNER JOIN sys_permission sp ON srp.permission_id = sp.id
+        WHERE sur.user_id = #{userId,jdbcType=BIGINT}
+        ORDER BY sp.permission_code
+    </select>
+
+    <!-- 分页查询员工列表（排除系统管理员） -->
+    <select id="selectEmployeesPage" resultMap="EmployeeResultMap">
+        SELECT
+            u.id, u.phone, u.name, u.email, u.avatar, u.gender, u.birthday,
+            u.store_id, u.employee_no, u.status, u.login_count,
+            u.last_login_time, u.last_login_ip, u.created_time, u.updated_time,
+            r.role_code, r.role_name
+        FROM sys_user u
+        LEFT JOIN sys_user_role ur ON u.id = ur.user_id
+        LEFT JOIN sys_role r ON ur.role_id = r.id
+        WHERE r.role_code != 'SYSTEM_ADMIN'
+        <if test="name != null and name != ''">
+            AND u.name LIKE CONCAT('%', #{name}, '%')
+        </if>
+        <if test="phone != null and phone != ''">
+            AND u.phone LIKE CONCAT('%', #{phone}, '%')
+        </if>
+        <if test="storeId != null">
+            AND u.store_id = #{storeId}
+        </if>
+        <if test="roleName != null and roleName != ''">
+            AND r.role_name = #{roleName}
+        </if>
+        <if test="status != null">
+            AND u.status = #{status}
+        </if>
+        <choose>
+            <when test="orderBy != null and orderBy != ''">
+                ORDER BY ${orderBy}
+            </when>
+            <otherwise>
+                ORDER BY u.created_time DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 根据ID查询员工详情（包含角色和门店信息） -->
+    <select id="selectEmployeeById" parameterType="java.lang.Long" resultMap="EmployeeResultMap">
+        SELECT
+            u.id, u.phone, u.password, u.name, u.email, u.avatar, u.gender, u.birthday,
+            u.store_id, u.employee_no, u.status, u.login_count,
+            u.last_login_time, u.last_login_ip, u.password_error_count,
+            u.password_error_time, u.password_update_time, u.is_first_login,
+            u.created_time, u.updated_time,
+            r.role_code, r.role_name
+        FROM sys_user u
+        LEFT JOIN sys_user_role ur ON u.id = ur.user_id
+        LEFT JOIN sys_role r ON ur.role_id = r.id
+        WHERE u.id = #{id,jdbcType=BIGINT}
+          AND r.role_code != 'SYSTEM_ADMIN'
+    </select>
+
+    <!-- 获取指定门店的所有员工 -->
+    <select id="selectStoreEmployees" parameterType="Long" resultMap="BaseResultMap">
+        SELECT u.id, u.phone, u.name, u.email, u.avatar, u.gender, u.birthday,
+               u.store_id, u.employee_no, u.status, u.login_count,
+               u.last_login_time, u.last_login_ip, u.password_error_count,
+               u.password_error_time, u.password_update_time, u.is_first_login,
+               u.created_time, u.updated_time
+        FROM sys_user u
+        WHERE u.store_id = #{storeId,jdbcType=BIGINT}
+          AND u.status = 1
+        ORDER BY u.name ASC
+    </select>
+
+    <!-- 更新用户状态 -->
+    <update id="updateStatus">
+        UPDATE sys_user
+        SET status = #{status,jdbcType=TINYINT},
+            updated_time = NOW()
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+</mapper>

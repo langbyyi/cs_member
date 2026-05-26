@@ -1,0 +1,61 @@
+/**
+ * 背景系统样式统一入口文件
+ * 按正确顺序导入所有背景相关样式
+ */
+
+/* 1. 基础兼容性样式 - 必须最先导入 */
+@import './browser-compatibility.css';
+
+/* 2. 主题系统样式 - 定义CSS变量和主题切换 */
+@import './theme-system.css';
+
+/* 3. 响应式系统样式 - 定义响应式断点和适配 */
+@import './responsive-system.css';
+
+/* 4. 性能优化样式 - 定义加载策略和性能控制 */
+@import './performance-optimized.css';
+
+/* 5. 具体主题样式 - 按需导入 */
+@import './modern-minimal.css';
+@import './convenience-store.css';
+@import './tech-smart.css';
+
+/* 6. 全局背景系统初始化 */
+.background-system {
+  /* 确保背景系统正确初始化 */
+  contain: layout style paint;
+  will-change: transform;
+}
+
+/* 7. 主题过渡效果全局设置 */
+* {
+  transition-property: background-color, border-color, color, box-shadow, transform, opacity;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 8. 预加载关键样式 */
+.preload-backgrounds {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+/* 9. 错误状态样式 */
+.background-error {
+  background: #f5f5f5;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.background-error::before {
+  content: "⚠️ 背景加载失败，使用备用样式";
+  font-size: 16px;
+  color: #666;
+}

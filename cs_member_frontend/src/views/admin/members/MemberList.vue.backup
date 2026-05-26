@@ -1,0 +1,1670 @@
+<template>
+  <div class="member-management">
+    <!-- 页面主体内容 -->
+    <div class="page-content">
+      <!-- 统计概览区域 -->
+      <div class="overview-section">
+        <div class="overview-cards">
+          <div class="overview-card total">
+            <div class="card-icon">
+              <el-icon><User /></el-icon>
+            </div>
+            <div class="card-content">
+              <div class="card-value">{{ formatNumber(pagination.total) }}</div>
+              <div class="card-label">总会员数</div>
+            </div>
+            <div class="card-trend up">
+              <el-icon><TrendCharts /></el-icon>
+              <span>12.5%</span>
+            </div>
+          </div>
+
+          <div class="overview-card active">
+            <div class="card-icon">
+              <el-icon><UserFilled /></el-icon>
+            </div>
+            <div class="card-content">
+              <div class="card-value">{{ formatNumber(activeMembersCount) }}</div>
+              <div class="card-label">活跃会员</div>
+            </div>
+            <div class="card-trend up">
+              <el-icon><TrendCharts /></el-icon>
+              <span>8.2%</span>
+            </div>
+          </div>
+
+          <div class="overview-card new">
+            <div class="card-icon">
+              <el-icon><Star /></el-icon>
+            </div>
+            <div class="card-content">
+              <div class="card-value">{{ formatNumber(newMembersCount) }}</div>
+              <div class="card-label">本月新增</div>
+            </div>
+            <div class="card-trend up">
+              <el-icon><TrendCharts /></el-icon>
+              <span>15.3%</span>
+            </div>
+          </div>
+
+          <div class="overview-card revenue">
+            <div class="card-icon">
+              <el-icon><Money /></el-icon>
+            </div>
+            <div class="card-content">
+              <div class="card-value">¥{{ formatMoney(getTotalConsumption()) }}</div>
+              <div class="card-label">累计消费</div>
+            </div>
+            <div class="card-trend up">
+              <el-icon><TrendCharts /></el-icon>
+              <span>6.8%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 搜索筛选区域 -->
+      <div class="filter-section">
+        <el-card class="filter-card" shadow="never">
+          <div class="filter-content">
+            <!-- 筛选标题区域 -->
+            <div class="filter-header">
+              <div class="filter-title">
+                <el-icon class="title-icon"><Search /></el-icon>
+                <span>智能筛选</span>
+                <el-tag v-if="hasActiveFilters" type="primary" size="small" effect="plain" class="filter-count">
+                  {{ getActiveFilterCount() }}个条件
+                </el-tag>
+              </div>
+              <div class="filter-actions">
+                <el-button
+                  v-if="hasActiveFilters"
+                  text
+                  type="danger"
+                  @click="clearAllFilters"
+                  class="action-btn"
+                >
+                  <el-icon><Delete /></el-icon>
+                  清除筛选
+                </el-button>
+                <el-button
+                  text
+                  type="primary"
+                  @click="showAdvancedSearch = !showAdvancedSearch"
+                  class="action-btn"
+                >
+                  <el-icon><Setting /></el-icon>
+                  {{ showAdvancedSearch ? '收起' : '高级' }}
+                </el-button>
+              </div>
+            </div>
+
+            <!-- 基础筛选表单 -->
+            <div class="basic-filters">
+              <el-row :gutter="16">
+                <el-col :span="8">
+                  <div class="filter-item">
+                    <el-input
+                      v-model="searchForm.keyword"
+                      placeholder="搜索姓名、手机号或会员号"
+                      clearable
+                      size="default"
+                      class="search-input"
+                      @clear="handleSearch"
+                      @input="handleSearch"
+                    >
+                      <template #prefix>
+                        <el-icon class="search-icon"><Search /></el-icon>
+                      </template>
+                    </el-input>
+                  </div>
+                </el-col>
+                <el-col :span="4">
+                  <div class="filter-item">
+                    <el-select
+                      v-model="searchForm.memberLevel"
+                      placeholder="会员等级"
+                      clearable
+                      size="default"
+                      style="width: 100%"
+                      @change="handleSearch"
+                      @clear="handleSearch"
+                    >
+                      <el-option label="全部等级" value="" />
+                      <el-option label="普通会员" :value="1" />
+                      <el-option label="银卡会员" :value="2" />
+                      <el-option label="金卡会员" :value="3" />
+                      <el-option label="钻石会员" :value="4" />
+                    </el-select>
+                  </div>
+                </el-col>
+                <el-col :span="4">
+                  <div class="filter-item">
+                    <el-select
+                      v-model="searchForm.status"
+                      placeholder="会员状态"
+                      clearable
+                      size="default"
+                      style="width: 100%"
+                      @change="handleSearch"
+                      @clear="handleSearch"
+                    >
+                      <el-option label="全部状态" value="" />
+                      <el-option label="正常" :value="1" />
+                      <el-option label="禁用" :value="0" />
+                    </el-select>
+                  </div>
+                </el-col>
+                <el-col :span="8">
+                  <div class="filter-item">
+                    <el-date-picker
+                      v-model="searchForm.dateRange"
+                      type="daterange"
+                      range-separator="至"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                      size="default"
+                      style="width: 100%"
+                      @change="handleSearch"
+                    />
+                  </div>
+                </el-col>
+              </el-row>
+
+              <!-- 操作按钮 -->
+              <div class="filter-buttons">
+                <el-button
+                  type="primary"
+                  @click="handleSearch"
+                  size="default"
+                  class="search-btn"
+                >
+                  <el-icon><Search /></el-icon>
+                  搜索
+                </el-button>
+                <el-button
+                  @click="resetSearch"
+                  size="default"
+                  class="reset-btn"
+                >
+                  <el-icon><RefreshLeft /></el-icon>
+                  重置
+                </el-button>
+              </div>
+            </div>
+
+            <!-- 高级筛选区域 -->
+            <el-collapse-transition>
+              <div v-show="showAdvancedSearch" class="advanced-filters">
+                <el-divider class="filter-divider">
+                  <el-icon><Setting /></el-icon>
+                  <span>高级筛选</span>
+                </el-divider>
+                <el-row :gutter="16">
+                  <el-col :span="6">
+                    <div class="filter-item">
+                      <label class="filter-label">最低余额</label>
+                      <el-input-number
+                        v-model="searchForm.minBalance"
+                        placeholder="最低余额"
+                        :min="0"
+                        :max="999999"
+                        :precision="2"
+                        style="width: 100%"
+                        controls-position="right"
+                        size="default"
+                        @change="handleSearch"
+                      />
+                    </div>
+                  </el-col>
+                  <el-col :span="6">
+                    <div class="filter-item">
+                      <label class="filter-label">最高余额</label>
+                      <el-input-number
+                        v-model="searchForm.maxBalance"
+                        placeholder="最高余额"
+                        :min="0"
+                        :max="999999"
+                        :precision="2"
+                        style="width: 100%"
+                        controls-position="right"
+                        size="default"
+                        @change="handleSearch"
+                      />
+                    </div>
+                  </el-col>
+                  <el-col :span="6">
+                    <div class="filter-item">
+                      <label class="filter-label">性别</label>
+                      <el-select
+                        v-model="searchForm.gender"
+                        placeholder="选择性别"
+                        clearable
+                        size="default"
+                        style="width: 100%"
+                        @change="handleSearch"
+                        @clear="handleSearch"
+                      >
+                        <el-option label="全部" value="" />
+                        <el-option label="男" value="男" />
+                        <el-option label="女" value="女" />
+                      </el-select>
+                    </div>
+                  </el-col>
+                  <el-col :span="6">
+                    <div class="filter-item">
+                      <label class="filter-label">注册门店</label>
+                      <el-input
+                        v-model="searchForm.storeName"
+                        placeholder="输入门店名称"
+                        clearable
+                        size="default"
+                        @clear="handleSearch"
+                        @input="handleSearch"
+                      />
+                    </div>
+                  </el-col>
+                </el-row>
+              </div>
+            </el-collapse-transition>
+          </div>
+        </el-card>
+      </div>
+
+      <!-- 快速筛选标签 -->
+      <div class="quick-filters">
+        <div class="filter-tags">
+          <span class="tags-label">快速筛选：</span>
+          <el-tag
+            :type="quickFilterActive === 'new' ? 'primary' : 'info'"
+            :effect="quickFilterActive === 'new' ? 'dark' : 'plain'"
+            class="filter-tag"
+            @click="handleQuickFilter('new')"
+          >
+            <el-icon><Star /></el-icon>
+            新会员
+          </el-tag>
+          <el-tag
+            :type="quickFilterActive === 'inactive' ? 'warning' : 'info'"
+            :effect="quickFilterActive === 'inactive' ? 'dark' : 'plain'"
+            class="filter-tag"
+            @click="handleQuickFilter('inactive')"
+          >
+            <el-icon><Clock /></el-icon>
+            低活跃
+          </el-tag>
+          <el-tag
+            :type="quickFilterActive === 'highValue' ? 'success' : 'info'"
+            :effect="quickFilterActive === 'highValue' ? 'dark' : 'plain'"
+            class="filter-tag"
+            @click="handleQuickFilter('highValue')"
+          >
+            <el-icon><Trophy /></el-icon>
+            高价值
+          </el-tag>
+          <el-tag
+            :type="quickFilterActive === 'vip' ? 'danger' : 'info'"
+            :effect="quickFilterActive === 'vip' ? 'dark' : 'plain'"
+            class="filter-tag"
+            @click="handleQuickFilter('vip')"
+          >
+            <el-icon><Medal /></el-icon>
+            VIP会员
+          </el-tag>
+        </div>
+      </div>
+
+      <!-- 数据表格区域 -->
+      <div class="table-section">
+        <el-card class="table-card" shadow="never">
+          <!-- 表格工具栏 -->
+          <div class="table-toolbar">
+            <div class="toolbar-left">
+              <div v-if="selectedRows.length > 0" class="selection-info">
+                <span class="selection-count">已选择 {{ selectedRows.length }} 项</span>
+                <el-button size="small" @click="clearSelection">清除选择</el-button>
+              </div>
+            </div>
+            <div class="toolbar-right">
+              <div class="batch-actions" v-if="selectedRows.length > 0">
+                <el-button-group>
+                  <el-tooltip content="批量导出" placement="top">
+                    <el-button :icon="Download" size="small" @click="handleBatchExport" />
+                  </el-tooltip>
+                  <el-tooltip content="批量通知" placement="top">
+                    <el-button :icon="Message" size="small" @click="handleBatchNotify" />
+                  </el-tooltip>
+                  <el-tooltip content="批量积分" placement="top">
+                    <el-button :icon="Coin" size="small" @click="handleBatchPointsAdjust" />
+                  </el-tooltip>
+                  <el-tooltip content="批量删除" placement="top">
+                    <el-button :icon="Delete" size="small" type="danger" @click="handleBatchDelete" />
+                  </el-tooltip>
+                </el-button-group>
+              </div>
+              <el-divider v-if="selectedRows.length > 0" direction="vertical" />
+              <div class="table-actions">
+                <el-button type="primary" @click="$router.push('/admin/members/create')">
+                  <el-icon><Plus /></el-icon>
+                  新增会员
+                </el-button>
+                <el-button @click="handleBatchImport">
+                  <el-icon><Upload /></el-icon>
+                  批量导入
+                </el-button>
+                <el-button @click="handleExport">
+                  <el-icon><Download /></el-icon>
+                  导出数据
+                </el-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 数据表格 -->
+          <el-table
+            ref="tableRef"
+            v-loading="loading"
+            :data="memberList"
+            style="width: 100%"
+            @selection-change="handleSelectionChange"
+            @row-click="handleRowClick"
+            @row-dblclick="handleRowDoubleClick"
+            @sort-change="handleSortChange"
+          >
+            <el-table-column type="selection" width="50" />
+
+            <el-table-column label="会员信息" min-width="200">
+              <template #default="{ row }">
+                <div class="member-info">
+                  <el-avatar :size="40" :src="row.avatar" class="member-avatar">
+                    {{ row.name?.charAt(0) || 'M' }}
+                  </el-avatar>
+                  <div class="member-details">
+                    <div class="member-name">
+                      {{ row.name }}
+                      <el-tag v-if="row.memberLevel >= 3" type="danger" size="small" effect="dark">
+                        VIP
+                      </el-tag>
+                    </div>
+                    <div class="member-meta">
+                      <span class="member-phone">{{ row.phone }}</span>
+                      <span class="member-no">{{ row.memberNo }}</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="会员等级" width="120" sortable="custom" prop="memberLevel">
+              <template #default="{ row }">
+                <el-tag :type="getMemberLevelType(row.memberLevel)" effect="light">
+                  {{ getMemberLevelText(row.memberLevel) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="积分余额" width="120" sortable="custom" prop="currentPoints">
+              <template #default="{ row }">
+                <div class="points-display">
+                  <span class="points-value">{{ formatNumber(row.currentPoints) }}</span>
+                  <div class="points-trend" v-if="row.pointsChange">
+                    <el-icon :class="row.pointsChange > 0 ? 'up' : 'down'">
+                      <ArrowUp v-if="row.pointsChange > 0" />
+                      <ArrowDown v-else />
+                    </el-icon>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="累计消费" width="120" sortable="custom" prop="totalConsumption">
+              <template #default="{ row }">
+                <span class="consumption-amount">¥{{ formatMoney(row.totalConsumption) }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="注册门店" width="140">
+              <template #default="{ row }">
+                <div class="store-info">
+                  <el-icon class="store-icon"><Shop /></el-icon>
+                  <span class="store-name" :class="{ 'self-register': row.registerStoreName === '自主注册' }">
+                    {{ row.registerStoreName || '自主注册' }}
+                  </span>
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="注册时间" width="110" sortable="custom" prop="createdTime">
+              <template #default="{ row }">
+                <div class="time-display">
+                  <div class="date">{{ formatDate(row.createdTime) }}</div>
+                  <div class="time">{{ formatTime(row.createdTime) }}</div>
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="最后消费" width="110">
+              <template #default="{ row }">
+                <div class="last-consumption" v-if="row.lastConsumptionTime">
+                  <div class="date">{{ formatDate(row.lastConsumptionTime) }}</div>
+                  <div class="time">{{ formatTime(row.lastConsumptionTime) }}</div>
+                </div>
+                <span v-else class="no-consumption">暂无消费</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="状态" width="80">
+              <template #default="{ row }">
+                <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">
+                  {{ row.status === 1 ? '正常' : '禁用' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="操作" width="180" fixed="right">
+              <template #default="{ row }">
+                <el-button-group size="small">
+                  <el-tooltip content="查看详情" placement="top">
+                    <el-button :icon="View" @click="handleViewDetail(row)" />
+                  </el-tooltip>
+                  <el-tooltip content="编辑会员" placement="top">
+                    <el-button :icon="Edit" @click="handleEdit(row)" />
+                  </el-tooltip>
+                  <el-tooltip content="调整积分" placement="top">
+                    <el-button :icon="Coin" @click="handleAdjustPoints(row)" />
+                  </el-tooltip>
+                  <el-dropdown trigger="click" @command="(command) => handleDropdownCommand(command, row)">
+                    <el-button :icon="MoreFilled" />
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item command="sendMessage">
+                          <el-icon><Message /></el-icon>
+                          发送消息
+                        </el-dropdown-item>
+                        <el-dropdown-item command="viewConsumption">
+                          <el-icon><List /></el-icon>
+                          消费记录
+                        </el-dropdown-item>
+                        <el-dropdown-item command="exportData">
+                          <el-icon><Download /></el-icon>
+                          导出数据
+                        </el-dropdown-item>
+                        <el-dropdown-item :command="row.status === 1 ? 'disable' : 'enable'" divided>
+                          <el-icon><Lock /></el-icon>
+                          {{ row.status === 1 ? '禁用账号' : '启用账号' }}
+                        </el-dropdown-item>
+                      </el-dropdown-menu>
+                    </template>
+                  </el-dropdown>
+                </el-button-group>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <!-- 分页组件 -->
+          <div class="pagination-wrapper">
+            <el-pagination
+              v-model:current-page="pagination.current"
+              v-model:page-size="pagination.pageSize"
+              :page-sizes="[10, 20, 50, 100]"
+              :total="pagination.total"
+              layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+            />
+          </div>
+        </el-card>
+      </div>
+    </div>
+
+    <!-- 右键菜单 -->
+    <div
+      v-show="contextMenuVisible"
+      class="context-menu"
+      :style="{ left: contextMenuPosition.x + 'px', top: contextMenuPosition.y + 'px' }"
+    >
+      <div class="context-menu-header">
+        <div class="member-info-mini">
+          <el-avatar :size="24" :src="contextMenuTarget?.avatar">
+            {{ contextMenuTarget?.name?.charAt(0) || 'M' }}
+          </el-avatar>
+          <span class="member-name-mini">{{ contextMenuTarget?.name }}</span>
+        </div>
+      </div>
+      <el-divider style="margin: 8px 0;" />
+      <div class="context-menu-items">
+        <div class="menu-item" @click="handleContextMenuAction('view')">
+          <el-icon><View /></el-icon>
+          <span>查看详情</span>
+        </div>
+        <div class="menu-item" @click="handleContextMenuAction('edit')">
+          <el-icon><Edit /></el-icon>
+          <span>编辑会员</span>
+        </div>
+        <div class="menu-item" @click="handleContextMenuAction('points')">
+          <el-icon><Coin /></el-icon>
+          <span>调整积分</span>
+        </div>
+        <div class="menu-item" @click="handleContextMenuAction('message')">
+          <el-icon><Message /></el-icon>
+          <span>发送消息</span>
+        </div>
+        <div class="menu-item" @click="handleContextMenuAction('consumption')">
+          <el-icon><List /></el-icon>
+          <span>消费记录</span>
+        </div>
+        <el-divider style="margin: 4px 12px;" />
+        <div class="menu-item danger" @click="handleContextMenuAction('toggleStatus')">
+          <el-icon><Lock /></el-icon>
+          <span>{{ contextMenuTarget?.status === 1 ? '禁用账号' : '启用账号' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { useRouter } from 'vue-router'
+import { getMemberList } from '@/api/member'
+import {
+  HomeFilled, Refresh, Setting, User, UserFilled, Star, Money, TrendCharts,
+  Search, RefreshLeft, Download, Upload, Plus, Message, Coin, Delete,
+  View, Edit, MoreFilled, List, Lock, ArrowUp, ArrowDown, Clock, Trophy, Medal, Shop
+} from '@element-plus/icons-vue'
+// 根据后端API响应结构的类型定义
+interface Member {
+  id: number
+  phone: string
+  memberNo: string
+  name: string
+  gender: number
+  email?: string
+  memberLevel: number
+  totalConsumption: number
+  totalPoints: number
+  currentPoints: number
+  balance: number
+  status: number
+  loginCount: number
+  lastLoginTime?: string
+  lastLoginIp?: string
+  createdTime: string
+  updatedTime?: string
+  // 前端计算字段
+  avatar?: string
+  pointsChange?: number
+  lastConsumptionTime?: string
+}
+
+interface PaginationParams {
+  current?: number
+  pageSize?: number
+  total?: number
+}
+
+
+// 真实API调用函数 - 仿造dashboard/stats的方式
+const getMemberList = async (params: any) => {
+  // 使用request工具调用后端API，自动处理JWT和代理
+  return request.get<{
+    code: number,
+    message: string,
+    data: {
+      list: Member[],
+      total: number
+    }
+  }({
+    page: params.page || pagination.current,
+    size: params.size || pagination.pageSize,
+    memberLevel: params.memberLevel,
+    status: params.status,
+    storeName: params.storeName || searchForm.storeName,
+    // 将关键词同时映射到姓名、手机号和会员号
+    ...(params.keyword && { name: params.keyword }),
+    ...(params.keyword && { phone: params.keyword }),
+    ...(params.keyword && { memberNo: params.keyword }),
+    // 添加余额筛选参数
+    minBalance: params.minBalance,
+    maxBalance: params.maxBalance,
+    // 添加其他参数
+    gender: params.gender,
+    startTime: params.startTime,
+    endTime: params.endTime
+  })
+}
+
+const router = useRouter()
+
+// 响应式数据
+const loading = ref(false)
+const showAdvancedSearch = ref(false)
+const showSettings = ref(false)
+const contextMenuVisible = ref(false)
+const contextMenuPosition = reactive({ x: 0, y: 0 })
+const contextMenuTarget = ref<Member | null>(null)
+
+// 表格引用
+const tableRef = ref()
+
+// 搜索表单
+const searchForm = reactive({
+  keyword: '',
+  memberLevel: '',
+  status: '',
+  dateRange: null as [string, string] | null,
+  minBalance: null as number | null,
+  maxBalance: null as number | null,
+  gender: '',
+  storeName: ''
+})
+
+// 分页数据
+const pagination = reactive<PaginationParams>({
+  current: 1,
+  pageSize: 20,
+  total: 0
+})
+
+// 排序参数
+const sortParams = reactive({
+  prop: '',
+  order: ''
+})
+
+// 数据列表
+const memberList = ref<Member[]>([])
+const selectedRows = ref<Member[]>([])
+
+// 快速筛选
+const quickFilterActive = ref('')
+
+// 统计数据
+const activeMembersCount = ref(0)
+const newMembersCount = ref(0)
+
+// 计算属性
+const hasActiveFilters = computed(() => {
+  return searchForm.keyword ||
+         searchForm.memberLevel ||
+         searchForm.status ||
+         searchForm.dateRange ||
+         searchForm.minBalance !== null ||
+         searchForm.maxBalance !== null ||
+         searchForm.gender ||
+         searchForm.storeName ||
+         quickFilterActive.value
+})
+
+// 获取活跃筛选条件数量
+const getActiveFilterCount = () => {
+  let count = 0
+  if (searchForm.keyword) count++
+  if (searchForm.memberLevel) count++
+  if (searchForm.status) count++
+  if (searchForm.dateRange) count++
+  if (searchForm.minBalance !== null) count++
+  if (searchForm.maxBalance !== null) count++
+  if (searchForm.gender) count++
+  if (searchForm.storeName) count++
+  if (quickFilterActive.value) count++
+  return count
+}
+
+// 格式化函数
+const formatNumber = (num: number) => {
+  return num.toLocaleString()
+}
+
+const formatMoney = (amount: number) => {
+  return (amount / 100).toFixed(2)
+}
+
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return ''
+  // 处理ISO格式的日期字符串
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('zh-CN')
+}
+
+const formatTime = (dateStr: string) => {
+  if (!dateStr) return ''
+  // 处理ISO格式的日期字符串
+  const date = new Date(dateStr)
+  return date.toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const getTotalConsumption = () => {
+  return memberList.value.reduce((sum, member) => sum + (member.totalConsumption || 0), 0)
+}
+
+// 会员等级相关
+const getMemberLevelType = (level: number) => {
+  const types = ['', '', 'info', 'warning', 'danger']
+  return types[level] || 'info'
+}
+
+const getMemberLevelText = (level: number) => {
+  const texts = ['', '普通会员', '银卡会员', '金卡会员', '钻石会员']
+  return texts[level] || '普通会员'
+}
+
+// 数据获取
+const fetchMemberList = async () => {
+  try {
+    loading.value = true
+
+    // 处理日期范围参数
+    const startTime = searchForm.dateRange?.[0] || null
+    const endTime = searchForm.dateRange?.[1] || null
+
+    const params = {
+      page: pagination.current,
+      size: pagination.pageSize,
+      name: searchForm.keyword,  // keyword同时用于姓名和手机号搜索
+      phone: searchForm.keyword, // keyword同时用于姓名和手机号搜索
+      memberLevel: searchForm.memberLevel,
+      status: searchForm.status,
+      storeName: searchForm.storeName,
+      startTime: startTime,
+      endTime: endTime,
+      minBalance: searchForm.minBalance,
+      maxBalance: searchForm.maxBalance,
+      gender: searchForm.gender,
+      sortBy: sortParams.prop,
+      sortOrder: sortParams.order,
+      quickFilter: quickFilterActive.value
+    }
+
+    const response = await getMemberList(params)
+
+    // 根据真实API响应格式处理数据
+    memberList.value = response.data.list || []
+    pagination.total = response.data.total || 0
+
+    // 更新统计数据
+    updateStatistics()
+  } catch (error) {
+    console.error('获取会员列表失败:', error)
+    ElMessage.error(error.message || '获取会员列表失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 更新统计数据
+const updateStatistics = () => {
+  // 基于真实数据计算统计信息
+  const now = new Date()
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+  const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+
+  // 活跃会员：90天内有登录的会员
+  activeMembersCount.value = memberList.value.filter(member => {
+    if (member.lastLoginTime) {
+      const lastLogin = new Date(member.lastLoginTime)
+      return lastLogin > ninetyDaysAgo
+    }
+    return false
+  }).length
+
+  // 新增会员：30天内注册的会员
+  newMembersCount.value = memberList.value.filter(member => {
+    const created = new Date(member.createdTime)
+    return created > thirtyDaysAgo
+  }).length
+}
+
+// 事件处理函数
+const handleSearch = () => {
+  pagination.current = 1
+  fetchMemberList()
+}
+
+const resetSearch = () => {
+  Object.assign(searchForm, {
+    keyword: '',
+    memberLevel: '',
+    status: '',
+    dateRange: null,
+    minBalance: null,
+    maxBalance: null,
+    gender: '',
+    storeName: ''
+  })
+  quickFilterActive.value = ''
+  pagination.current = 1
+  fetchMemberList()
+}
+
+const clearAllFilters = () => {
+  resetSearch()
+}
+
+const handleQuickFilter = (filter: string) => {
+  if (quickFilterActive.value === filter) {
+    quickFilterActive.value = ''
+  } else {
+    quickFilterActive.value = filter
+  }
+  pagination.current = 1
+  fetchMemberList()
+}
+
+const handleSelectionChange = (selection: Member[]) => {
+  selectedRows.value = selection
+}
+
+const clearSelection = () => {
+  tableRef.value?.clearSelection()
+  selectedRows.value = []
+}
+
+const handleRowClick = (row: Member) => {
+  // 单击行时的处理
+}
+
+const handleRowDoubleClick = (row: Member) => {
+  handleViewDetail(row)
+}
+
+const handleSortChange = ({ prop, order }: { prop: string; order: string }) => {
+  sortParams.prop = prop
+  sortParams.order = order
+  fetchMemberList()
+}
+
+const handleSizeChange = (size: number) => {
+  pagination.pageSize = size
+  fetchMemberList()
+}
+
+const handleCurrentChange = (page: number) => {
+  pagination.current = page
+  fetchMemberList()
+}
+
+const refreshData = () => {
+  fetchMemberList()
+}
+
+// 操作处理函数
+const handleViewDetail = (member: Member) => {
+  router.push(`/admin/members/${member.id}`)
+}
+
+const handleEdit = (member: Member) => {
+  router.push(`/admin/members/${member.id}/edit`)
+}
+
+const handleAdjustPoints = (member: Member) => {
+  // 打开积分调整对话框
+}
+
+const handleSendMessage = (member: Member) => {
+  // 打开发送消息对话框
+}
+
+const handleBatchExport = () => {
+  // 批量导出
+}
+
+const handleBatchNotify = () => {
+  // 批量通知
+}
+
+const handleBatchPointsAdjust = () => {
+  // 批量积分调整
+}
+
+const handleBatchDelete = () => {
+  ElMessageBox.confirm('确定要删除选中的会员吗？', '批量删除', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    // 执行批量删除
+  })
+}
+
+const handleBatchImport = () => {
+  // 批量导入
+}
+
+const handleExport = () => {
+  // 导出数据
+}
+
+const handleDropdownCommand = (command: string, member: Member) => {
+  switch (command) {
+    case 'sendMessage':
+      handleSendMessage(member)
+      break
+    case 'viewConsumption':
+      router.push(`/admin/members/${member.id}/consumption`)
+      break
+    case 'exportData':
+      // 导出单个会员数据
+      break
+    case 'disable':
+    case 'enable':
+      handleToggleStatus(member)
+      break
+  }
+}
+
+const handleContextMenuAction = (action: string) => {
+  if (!contextMenuTarget.value) return
+
+  switch (action) {
+    case 'view':
+      handleViewDetail(contextMenuTarget.value)
+      break
+    case 'edit':
+      handleEdit(contextMenuTarget.value)
+      break
+    case 'points':
+      handleAdjustPoints(contextMenuTarget.value)
+      break
+    case 'message':
+      handleSendMessage(contextMenuTarget.value)
+      break
+    case 'consumption':
+      router.push(`/admin/members/${contextMenuTarget.value.id}/consumption`)
+      break
+    case 'toggleStatus':
+      handleToggleStatus(contextMenuTarget.value)
+      break
+  }
+
+  contextMenuVisible.value = false
+}
+
+const handleToggleStatus = (member: Member) => {
+  const action = member.status === 1 ? '禁用' : '启用'
+  ElMessageBox.confirm(`确定要${action}会员 ${member.name} 吗？`, `${action}会员`, {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    // 执行状态切换
+  })
+}
+
+// 右键菜单处理
+const setupContextMenu = () => {
+  document.addEventListener('click', () => {
+    contextMenuVisible.value = false
+  })
+
+  document.addEventListener('contextmenu', (e) => {
+    // 检查是否在表格行上右键
+    const target = e.target as HTMLElement
+    const row = target.closest('.el-table__row')
+    if (row) {
+      e.preventDefault()
+      const index = parseInt(row.getAttribute('data-row-index') || '0')
+      const member = memberList.value[index]
+      if (member) {
+        contextMenuTarget.value = member
+        contextMenuPosition.x = e.clientX
+        contextMenuPosition.y = e.clientY
+        contextMenuVisible.value = true
+      }
+    }
+  })
+}
+
+// 生命周期
+onMounted(() => {
+  fetchMemberList()
+  setupContextMenu()
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', () => {
+    contextMenuVisible.value = false
+  })
+  document.removeEventListener('contextmenu', () => {})
+})
+</script>
+
+<style scoped>
+.member-management {
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+
+/* 页面主体 */
+.page-content {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* 统计概览 */
+.overview-section {
+  margin-bottom: 24px;
+}
+
+.overview-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.overview-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e4e7ed;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.overview-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.overview-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--card-color) 0%, var(--card-color-light) 100%);
+}
+
+.overview-card.total {
+  --card-color: #409eff;
+  --card-color-light: #79bbff;
+}
+
+.overview-card.active {
+  --card-color: #67c23a;
+  --card-color-light: #95d475;
+}
+
+.overview-card.new {
+  --card-color: #e6a23c;
+  --card-color-light: #ebb563;
+}
+
+.overview-card.revenue {
+  --card-color: #f56c6c;
+  --card-color-light: #f78989;
+}
+
+.card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--card-color) 0%, var(--card-color-light) 100%);
+  color: white;
+  font-size: 24px;
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #303133;
+  margin-bottom: 4px;
+}
+
+.card-label {
+  font-size: 14px;
+  color: #909399;
+}
+
+.card-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #67c23a;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.card-trend.up {
+  color: #67c23a;
+}
+
+.card-trend.down {
+  color: #f56c6c;
+}
+
+/* 筛选区域 */
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.filter-card {
+  border-radius: 12px;
+  border: 1px solid #e4e7ed;
+}
+
+.filter-content {
+  padding: 0;
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px 24px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.filter-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #303133;
+  font-size: 15px;
+}
+
+.title-icon {
+  color: #409eff;
+  font-size: 16px;
+}
+
+.filter-count {
+  margin-left: 8px;
+  font-weight: 500;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  border-radius: 6px;
+  color: #303133 !important;
+}
+
+.action-btn:deep(.el-button__text) {
+  color: #303133 !important;
+  font-weight: 500 !important;
+}
+
+.action-btn.el-button--danger:hover {
+  color: #f56c6c !important;
+  background-color: rgba(245, 108, 108, 0.1) !important;
+}
+
+.action-btn.el-button--primary:hover {
+  color: #409eff !important;
+  background-color: rgba(64, 158, 255, 0.1) !important;
+}
+
+/* 基础筛选 */
+.basic-filters {
+  padding: 20px 24px 16px 24px;
+}
+
+.filter-item {
+  margin-bottom: 12px;
+}
+
+.search-input {
+  border-radius: 8px;
+}
+
+.search-input :deep(.el-input__wrapper) {
+  border-radius: 8px;
+  border: 1px solid #dcdfe6;
+  transition: all 0.3s ease;
+}
+
+.search-input :deep(.el-input__wrapper:hover) {
+  border-color: #409eff;
+}
+
+.search-input :deep(.el-input__wrapper.is-focus) {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+}
+
+.search-icon {
+  color: #909399;
+  font-size: 14px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f2f5;
+}
+
+.search-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
+}
+
+.reset-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* 高级筛选 */
+.advanced-filters {
+  padding: 0 24px 20px 24px;
+}
+
+.filter-divider {
+  margin: 16px 0 20px 0;
+}
+
+.filter-divider :deep(.el-divider__text) {
+  background-color: #f8f9fa;
+  padding: 8px 16px;
+  border-radius: 6px;
+  color: #606266;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid #e4e7ed;
+}
+
+.filter-divider :deep(.el-divider__text .el-icon) {
+  margin-right: 6px;
+  color: #409eff;
+}
+
+.filter-label {
+  display: block;
+  font-size: 13px;
+  color: #606266;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.basic-filters {
+  margin-bottom: 16px;
+}
+
+.advanced-filters {
+  padding-top: 16px;
+}
+
+/* 快速筛选标签 */
+.quick-filters {
+  margin-bottom: 20px;
+  padding: 16px 0;
+}
+
+.filter-tags {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tags-label {
+  font-size: 14px;
+  color: #606266;
+  font-weight: 500;
+}
+
+.filter-tag {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s ease;
+}
+
+.filter-tag:hover {
+  transform: translateY(-1px);
+}
+
+/* 修复选中标签的文字颜色和背景 */
+.filter-tag.el-tag--primary.el-tag--dark {
+  color: #409eff !important;
+  background-color: #ecf5ff !important;
+  border-color: #b3d8ff !important;
+}
+
+.filter-tag.el-tag--primary.el-tag--dark .el-tag__content {
+  color: #409eff !important;
+}
+
+.filter-tag.el-tag--primary.el-tag--dark:hover {
+  background-color: #d9ecff !important;
+  border-color: #a0cfff !important;
+}
+
+/* 确保所有选中状态都有合适的背景色 */
+.filter-tag.el-tag--primary {
+  background-color: #ecf5ff !important;
+  border-color: #b3d8ff !important;
+}
+
+.filter-tag.el-tag--primary .el-tag__content {
+  color: #409eff !important;
+}
+
+/* 表格区域 */
+.table-section {
+  margin-bottom: 24px;
+}
+
+.table-card {
+  border-radius: 12px;
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 16px 0;
+}
+
+.selection-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.selection-count {
+  font-size: 14px;
+  color: #606266;
+}
+
+.batch-actions {
+  display: flex;
+  align-items: center;
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 会员信息显示 */
+.member-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.member-avatar {
+  flex-shrink: 0;
+}
+
+.member-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.member-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 4px;
+}
+
+.member-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.member-phone {
+  color: #606266;
+}
+
+.member-no {
+  color: #909399;
+}
+
+/* 积分显示 */
+.points-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.points-value {
+  font-weight: 600;
+  color: #303133;
+}
+
+.points-trend .up {
+  color: #67c23a;
+}
+
+.points-trend .down {
+  color: #f56c6c;
+}
+
+/* 金额显示 */
+.consumption-amount {
+  font-weight: 600;
+  color: #f56c6c;
+}
+
+/* 门店信息显示 */
+.store-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.store-icon {
+  color: #409eff;
+  font-size: 14px;
+}
+
+.store-name {
+  font-size: 13px;
+  color: #606266;
+  flex: 1;
+}
+
+.store-name.self-register {
+  color: #67c23a;
+  font-weight: 500;
+}
+
+/* 时间显示 */
+.time-display {
+  font-size: 12px;
+}
+
+.date {
+  color: #303133;
+  margin-bottom: 2px;
+}
+
+.time {
+  color: #909399;
+}
+
+.last-consumption {
+  font-size: 12px;
+}
+
+.no-consumption {
+  font-size: 12px;
+  color: #c0c4cc;
+}
+
+/* 分页 */
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+/* 右键菜单 */
+.context-menu {
+  position: fixed;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e4e7ed;
+  z-index: 1000;
+  min-width: 160px;
+  padding: 8px 0;
+}
+
+.context-menu-header {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.member-info-mini {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.member-name-mini {
+  font-weight: 600;
+  color: #303133;
+}
+
+.context-menu-items {
+  padding: 4px 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #606266;
+  transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+  background: #f5f7fa;
+  color: #409eff;
+}
+
+.menu-item.danger {
+  color: #f56c6c;
+}
+
+.menu-item.danger:hover {
+  background: #fef0f0;
+  color: #f56c6c;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .overview-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-content {
+    padding: 16px;
+  }
+
+  .overview-cards {
+    grid-template-columns: 1fr;
+  }
+
+  
+  .filter-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .table-toolbar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .toolbar-right {
+    width: 100%;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .basic-filters .el-col {
+    margin-bottom: 12px;
+  }
+}
+
+/* 加载状态 */
+.el-loading-mask {
+  border-radius: 12px;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.overview-card,
+.filter-card,
+.table-card {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f7fa;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c0c4cc;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0a7b3;
+}
+</style>
